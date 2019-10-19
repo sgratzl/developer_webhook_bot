@@ -1,6 +1,6 @@
 {
-  "name": "webhook-bot",
-  "description": "",
+  "name": "developer_webhook_bot",
+  "description": "Telegram Bot for forwarding webhooks",
   "version": "1.0.0",
   "author": {
     "name": "Samuel Gratzl",
@@ -12,12 +12,14 @@
   "scripts": {
     "compile": "tsc",
     "watch": "tsc --watch",
-    "build": "npm run compile"
+    "build": "npm run compile",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "telegraf": "^3.33.0"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.33",
     "serverless": "^1.54.0",
     "serverless-localtunnel": "0.0.16",
     "serverless-offline": "^5.12.0",

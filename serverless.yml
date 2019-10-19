@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: webhook-bot # NOTE: update this with your service name
+service: developer_webhook_bot # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -28,19 +28,19 @@ provider:
   # you can define service wide environment variables here
 
   environment:
-    BOT_TOKEN: ${ssm:webhookbot.BOT_TOKEN}
+    BOT_TOKEN: ${ssm:developer_webhook_bot.BOT_TOKEN}
 
 functions:
   bot:
     handler: build.bothook
     timeout: 30
     events:
-      - http: POST /webhook-bot
+      - http: POST /developer_webhook_bot
   bot:
     handler: build.webhook
     timeout: 30
     events:
-      - http: POST /webhook-bot-hook
+      - http: POST /developer_webhook_bot-hook
 
 plugins:
   - serverless-offline-ssm
@@ -49,5 +49,5 @@ plugins:
 
 custom:
   localtunnel:
-    subdomain: webhook-bot
+    subdomain: developer_webhook_bot
     port: 3000

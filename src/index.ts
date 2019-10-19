@@ -1,4 +1,5 @@
 import Telegraf from 'telegraf';
+import {APIGatewayProxyHandler, APIGatewayProxyEvent} from 'aws-lambda';
 
 const bot = new Telegraf(process.env.BOT_TOKEN!, {
 });
@@ -17,16 +18,28 @@ bot.on('sticker', (ctx) => ctx.reply('👍'));
 bot.hears('hi', (ctx) => ctx.reply('Hey there'));
 
 
-
-export async function bothook(event: {body: string}) {
-  if (!event.body || event.body.length === 0) {
-    return {statusCode: 200, body: ''};
+function getBody(event: APIGatewayProxyEvent): any {
+  if (!event.body) {
+    return {};
   }
-  const body = event.body[0] === '{' ? JSON.parse(event.body) : JSON.parse(Buffer.from(event.body, 'base64').toString());
+  if (event.isBase64Encoded) {
+    return JSON.parse(Buffer.from(event.body, 'base64').toString());
+  }
+  return JSON.parse(event.body);
+}
+
+export const botbook: APIGatewayProxyHandler = async (event, context) => {
+  console.log(event, context);
+  if (!event.body || event.body.length === 0) {
+    return {statusCode: 400, body: 'Bad Request'};
+  }
+  const body = getBody(event);
   await bot.handleUpdate(body);
-  return {statusCode: 200, body: ''};
+  return {statusCode: 200, body: 'Ok'};
 };
 
-export async function webhook(event: {body: string}) {
-  return {statusCode: 200, body: ''};
+export const webhook: APIGatewayProxyHandler = async (event, context) => {
+  console.log(event, context);
+  //const body = getBody(event);
+  return {statusCode: 200, body: 'Ok'};
 };
