@@ -11,7 +11,8 @@
   "main": "build/index.js",
   "scripts": {
     "compile": "tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "build": "npm run compile"
   },
   "dependencies": {
     "telegraf": "^3.33.0"
