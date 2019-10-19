@@ -16,6 +16,9 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
+    "@octokit/webhooks": "^6.3.2",
+    "@types/dotenv": "^6.1.1",
+    "dotenv": "^8.2.0",
     "telegraf": "^3.33.0"
   },
   "devDependencies": {

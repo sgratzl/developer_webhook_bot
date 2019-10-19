@@ -36,7 +36,7 @@ functions:
     timeout: 30
     events:
       - http: POST /developer_webhook_bot
-  bot:
+  webhook:
     handler: build.webhook
     timeout: 30
     events:
