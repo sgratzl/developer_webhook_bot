@@ -2,13 +2,17 @@
   "name": "developer_webhook_bot",
   "description": "Telegram Bot for forwarding webhooks",
   "version": "1.0.0",
-  "author": {
-    "name": "Samuel Gratzl",
-    "email": "samu@sgratzl.com",
-    "url": "https://wwww.sgratzl.com"
-  },
+  "author": "Samuel Gratzl <samu@sgratzl.com> (https://wwww.sgratzl.com)",
   "license": "MIT",
-  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sgratzl/webhook-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sgratzl/webhook-bot/issues"
+  },
+  "homepage": "https://github.com/sgratzl/webhook-bot#readme",
+
   "engines": {
     "node": "10.x"
   },
