@@ -92,13 +92,13 @@ function init(api: WebhooksApi, chatId: string, telegram: Telegram) {
       case 'request_changes':
         return reply(`!! New pull request review ${reviewLink(payload)}\nRequest Changes by ${user(review.user)}`, review.body);
       default:
-          return reply(`New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, review.body);
+        return reply(`New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, review.body);
     }
   });
 
   api.on('pull_request_review_comment.created', ({payload}) => {
     const diff = `\`${payload.comment.path}\n${payload.comment.diff_hunk}\``;
-    return reply(`💬 New pull request review comment ${commentLink(payload)}\nby ${user(payload.comment.user)}\n${diff}`, payload.comment.body);
+    return reply(`💬 New pull request review comment ${commentLink(payload)}\nby ${user(payload.comment.user)}`, diff, payload.comment.body);
   });
 
   api.on('push', ({payload}) => {
@@ -109,7 +109,7 @@ function init(api: WebhooksApi, chatId: string, telegram: Telegram) {
     }
     const branch = ref.substring('refs/heads/'.length);
 
-    const header = `🔨 ${link(payload.compare, `${commits.length} new commits`)} to ${payload.repository.full_name}:${branch}`;
+    const header = `🔨 ${link(payload.compare, `${commits.length} new commits`)} to \`${payload.repository.full_name}\`:${branch}`;
     const body: string[] = [];
     for (const commit of commits) {
       body.push(`${link(commit.url, commit.id.slice(0, 7))}: ${commit.message} by ${commit.author.name}`);

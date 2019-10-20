@@ -7,6 +7,7 @@ import GithubWebHook from './webhooks/github';
 
 
 const telegraf = new Telegraf(process.env.BOT_TOKEN!, {
+  username: 'developer_webhook_bot'
 });
 
 const githubHandler = new GithubWebHook(telegraf.telegram);
@@ -21,6 +22,7 @@ export const bot: APIGatewayProxyHandler = async (event) => {
     return badRequest();
   }
   const body = getBody(event);
+  //console.log(body);
   await telegraf.handleUpdate(body);
   return ok();
 };
