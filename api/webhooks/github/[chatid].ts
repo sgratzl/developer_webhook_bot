@@ -1,5 +1,5 @@
 import {NowRequest, NowResponse} from '@now/node';
-import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
+import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadProject, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
 import {ok} from '../../_internal/responses';
 import {createSecret} from '../../_internal/secret';
 import {replyer} from '../../_internal/telegram';
@@ -30,6 +30,11 @@ function releaseLink(payload: WebhookPayloadRelease) {
 function repoLink(payload: {repository: PayloadRepository}) {
   const repo = payload.repository;
   return link(repo.html_url, `${repo.full_name}`);
+}
+
+function projectLink(payload: WebhookPayloadProject) {
+  const project = payload.project;
+  return link(project.html_url, `${project.name}`);
 }
 
 function commentLink(payload: WebhookPayloadIssueComment | WebhookPayloadPullRequestReviewComment) {
@@ -166,7 +171,7 @@ function handleExtras(api: WebhooksApi, reply: IReplyer) {
 
   api.on('repository_vulnerability_alert.create', ({payload}) => {
     const alert = payload.alert;
-    return reply(`💊 Vulnerability Alert for ${repoLink(payload)} in \`${alert.affected_package_name}\``);
+    return reply(`☢ Vulnerability Alert for ${repoLink(payload)} in \`${alert.affected_package_name}\``);
   });
 
   api.on('star.created', ({payload}) => {
@@ -175,6 +180,15 @@ function handleExtras(api: WebhooksApi, reply: IReplyer) {
 
   api.on('fork', ({payload}) => {
     return reply(`⭐ ${repoLink(payload)} was forked by ${user(payload.sender)}`);
+  });
+}
+
+function handleProjects(api: WebhooksApi, reply: IReplyer) {
+  api.on('project.created', ({payload}) => {
+    return reply(`📘 Project ${projectLink(payload)} created in ${repoLink(payload)} by ${user(payload.project.creator)}`, payload.project.body);
+  });
+  api.on('project_card.created', ({payload}) => {
+    return reply(`📘 Project Card created in ${repoLink(payload)} by ${user(payload.project_card.creator)}`, payload.project_card.note);
   });
 }
 
@@ -248,6 +262,7 @@ export default async function handle(req: NowRequest, res: NowResponse) {
   handlePush(api, reply);
   handleRelease(api, reply);
   handleStatus(api, reply);
+  handleProjects(api, reply);
 
   await api.verifyAndReceive({
     id: req.headers['x-request-id'] as string,
