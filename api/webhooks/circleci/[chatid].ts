@@ -17,7 +17,7 @@ interface ICircleCIMessage {
 export const NAME = 'CircleCI';
 
 export function webhookMessage(server: string, chatId: string) {
-  const url = `${server}/circleci/${encodeURIComponent(chatId)}`;
+  const url = `${server}/webhooks/circleci/${encodeURIComponent(chatId)}`;
   return `Please use this webhook url:
   [${url}](${url})
   `;

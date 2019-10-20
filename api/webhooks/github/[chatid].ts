@@ -119,7 +119,7 @@ function init(api: WebhooksApi, chatId: string) {
 export const NAME = 'Github';
 
 export function webhookMessage(server: string, chatId: string) {
-  const url = `${server}/github/${encodeURIComponent(chatId)}`;
+  const url = `${server}/webhooks/github/${encodeURIComponent(chatId)}`;
   const secret = createSecret(chatId);
 
   return `Please use this webhook url:
