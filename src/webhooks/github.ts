@@ -104,10 +104,10 @@ function init(api: WebhooksApi, chatId: string, telegram: Telegram) {
   api.on('push', ({payload}) => {
     const commits = payload.commits;
     const ref = payload.ref;
-    if (commits.length === 0 || !ref.startsWith('refs/head/')) {
+    if (commits.length === 0 || !ref.startsWith('refs/heads/')) {
       return;
     }
-    const branch = ref.substring('refs/head/'.length);
+    const branch = ref.substring('refs/heads/'.length);
 
     const header = `🔨 ${link(payload.compare, `${commits.length} new commits`)} to ${payload.repository.full_name}:${branch}`;
     const body: string[] = [];
