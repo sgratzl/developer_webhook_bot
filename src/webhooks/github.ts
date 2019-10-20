@@ -1,24 +1,12 @@
 import WebhooksApi, {WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadIssueComment, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment} from '@octokit/webhooks';
 import {Telegram} from 'telegraf';
-import {createSecret, truncateMessage} from '../utils';
+import {createSecret, replyer} from '../utils';
 import {badRequest, ok, normalizeHeaders, getBody} from '../responses';
 import {IWebHookHandler} from './interfaces';
 import {APIGatewayProxyEvent} from 'aws-lambda';
 
 function link(url: string, title: string) {
   return `[${title}](${url})`;
-}
-
-function replyer(telegram: Telegram, chatId: string) {
-  return (header: string, body?: string | null, footer?: string) => {
-
-    const msg = body ? truncateMessage(header, body, footer) : truncateMessage('', header);
-
-    return telegram.sendMessage(chatId, msg, {
-      disable_web_page_preview: true,
-      parse_mode: 'Markdown'
-    }).then(() => undefined);
-  };
 }
 
 function user(user: WebhookPayloadIssuesIssueUser) {
@@ -30,6 +18,7 @@ function issueLink(payload: WebhookPayloadIssues) {
   const repo = payload.repository;
   return link(issue.html_url, `${repo.full_name}#${issue.number} ${issue.title}`);
 }
+
 function commentLink(payload: WebhookPayloadIssueComment | WebhookPayloadPullRequestReviewComment) {
   const base = (payload as WebhookPayloadIssueComment).issue || (payload as WebhookPayloadPullRequestReviewComment).pull_request;
   const repo = payload.repository;
@@ -135,7 +124,7 @@ export default class GithubWebHook implements IWebHookHandler {
   }
 
   webhookMessage(server: string, chatId: string) {
-    const url = `${server}/developer-webhook-bot-github?chatid=${encodeURIComponent(chatId)}`;
+    const url = `${server}/github?chatid=${encodeURIComponent(chatId)}`;
     const secret = createSecret(chatId);
 
     return `Please use this webhook url:

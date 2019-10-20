@@ -1,5 +1,6 @@
 
 import {createHmac} from 'crypto';
+import {Telegram} from 'telegraf';
 
 const baseSecret = process.env.WEBHOOK_SECRET || process.env['developer-webhook-bot.WEBHOOK_SECRET']!;
 
@@ -18,4 +19,16 @@ export function truncateMessage(header: string, body: string, footer = '') {
   const remaining = DEFAULT_TRUNCATION_LIMIT - header.length - footer.length - TRUNCATED_MESSAGE.length - 10;
   return `${header}\n\n${body.slice(0, remaining)}\n${TRUNCATED_MESSAGE}\n${footer}`
 
+}
+
+export function replyer(telegram: Telegram, chatId: string) {
+  return (header: string, body?: string | null, footer?: string) => {
+
+    const msg = body ? truncateMessage(header, body, footer) : truncateMessage('', header);
+
+    return telegram.sendMessage(chatId, msg, {
+      disable_web_page_preview: true,
+      parse_mode: 'Markdown'
+    }).then(() => undefined);
+  };
 }

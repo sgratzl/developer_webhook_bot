@@ -35,12 +35,10 @@ provider:
 functions:
   bot:
     handler: build.bot
-    timeout: 30
     events:
       - http: POST /bot
   github:
     handler: build.github
-    timeout: 30
     events:
       - http: POST /github
 
