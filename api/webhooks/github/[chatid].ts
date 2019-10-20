@@ -141,7 +141,7 @@ function init(api: WebhooksApi, chatId: string) {
   });
 
   api.on('release.created', ({payload}) => {
-    let sub = ''
+    let sub = '';
     if (payload.release.draft) {
       sub = 'draft ';
     } else if (payload.release.prerelease) {
@@ -171,7 +171,7 @@ function init(api: WebhooksApi, chatId: string) {
     const status = payload.deployment_status;
     switch (status.state) {
       case 'success':
-        return reply(`☀ ${repoLink(payload)} was successfully ${link(status.deployment_url, 'deployed')}`, status.description);
+        return reply(`☀ ${repoLink(payload)} was successfully ${link(status.deployment_url, 'deployed')}`);
       case 'failure':
         return reply(`🌩 ${repoLink(payload)} failed to ${link(status.deployment_url, 'deploy')}`, status.description);
       case 'error':
@@ -244,7 +244,7 @@ export default async function handle(req: NowRequest, res: NowResponse) {
     name: req.headers['x-github-event'] as string,
     signature: req.headers['x-hub-signature'] as string,
     payload: req.body
-  })
+  });
 
   return ok(res);
 }

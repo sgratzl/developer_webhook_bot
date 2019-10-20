@@ -32,7 +32,7 @@ export default async function handle(req: NowRequest, res: NowResponse) {
 
   const reply = replyer(chatId);
 
-  reply(body.text);
+  await reply(body.text);
 
   return ok(res);
 }

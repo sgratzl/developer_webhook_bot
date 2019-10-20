@@ -2,7 +2,11 @@
   "name": "developer_webhook_bot",
   "description": "Telegram Bot for forwarding webhooks",
   "version": "1.0.0",
-  "author": "Samuel Gratzl <samu@sgratzl.com> (https://wwww.sgratzl.com)",
+  "author": {
+    "name": "Samuel Gratzl",
+    "email": "sam@sgratzl.com",
+    "url": "https://www.sgratzl.com"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,20 +16,28 @@
     "url": "https://github.com/sgratzl/webhook-bot/issues"
   },
   "homepage": "https://github.com/sgratzl/webhook-bot#readme",
-
   "engines": {
     "node": "10.x"
   },
   "scripts": {
     "compile": "tsc",
     "watch": "tsc --watch",
-    "build": "npm run compile"
+    "postbuild": "npm run test",
+    "build": "npm run compile",
+    "test": "eslint -c ./.eslintrc.js api/**/*.ts",
+    "release:major": "release-it major",
+    "release:minor": "release-it minor",
+    "release:patch": "release-it patch",
+    "release:pre": "release-it --preRelease=alpha --npm.tag=next"
   },
   "dependencies": {
     "@octokit/webhooks": "^6.3.2",
     "telegraf": "^3.33.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
+    "eslint": "^6.5.1",
     "@now/node": "^1.0.1",
     "now": "^16.3.1",
     "typescript": "^3.6.4"

@@ -8,7 +8,7 @@ import {toArgs} from './_internal/telegram';
 const webhooks = [
   github,
   circleci
-]
+];
 
 export default async function handle(req: NowRequest, res: NowResponse) {
   const server = `https://${req.headers.host}/api`;
@@ -35,7 +35,7 @@ export default async function handle(req: NowRequest, res: NowResponse) {
       return Markup.callbackButton(webhook.NAME, webhook.NAME);
     });
     return ctx.reply('Available Webhook Providers', {
-      reply_markup: Markup.inlineKeyboard(buttons)
+      reply_markup: Markup.inlineKeyboard(buttons) // eslint-disable-line @typescript-eslint/camelcase
     });
   });
 
@@ -49,4 +49,4 @@ export default async function handle(req: NowRequest, res: NowResponse) {
   await bot.handleUpdate(req.body);
 
   return ok(res);
-};
+}

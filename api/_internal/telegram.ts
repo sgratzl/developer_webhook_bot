@@ -9,7 +9,7 @@ export function truncateMessage(header: string, body: string, footer = '') {
     return full;
   }
   const remaining = DEFAULT_TRUNCATION_LIMIT - header.length - footer.length - TRUNCATED_MESSAGE.length - 10;
-  return `${header}\n\n${body.slice(0, remaining)}\n${TRUNCATED_MESSAGE}\n${footer}`
+  return `${header}\n\n${body.slice(0, remaining)}\n${TRUNCATED_MESSAGE}\n${footer}`;
 
 }
 
@@ -30,8 +30,8 @@ export function replyer(chatId: string) {
     const msg = body ? truncateMessage(header, body, footer) : truncateMessage('', header);
 
     return telegram.sendMessage(chatId, msg, {
-      disable_web_page_preview: true,
-      parse_mode: 'Markdown'
+      disable_web_page_preview: true, // eslint-disable-line @typescript-eslint/camelcase
+      parse_mode: 'Markdown' // eslint-disable-line @typescript-eslint/camelcase
     }).then(() => undefined);
   };
 }
