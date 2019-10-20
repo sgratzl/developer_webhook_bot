@@ -2,6 +2,7 @@
   "name": "developer_webhook_bot",
   "description": "Telegram Bot for forwarding webhooks",
   "version": "1.0.0",
+  "private": true,
   "author": {
     "name": "Samuel Gratzl",
     "email": "sam@sgratzl.com",
