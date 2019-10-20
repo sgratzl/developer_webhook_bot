@@ -11,6 +11,8 @@ const webhooks = [
 ]
 
 export default async function handle(req: NowRequest, res: NowResponse) {
+  console.log(req);
+  console.log(res);
   const server = req.url!.replace('/bot', '');
 
   const bot = new Telegraf(process.env.BOT_TOKEN!, {
