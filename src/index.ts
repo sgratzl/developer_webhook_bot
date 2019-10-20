@@ -31,6 +31,6 @@ export const github = githubHandler.handle.bind(githubHandler);
 
 if (require.main === module) {
   config();
-  telegraf.token = process.env['developer_webhook_bot.BOT_TOKEN']!;
+  telegraf.token = process.env['developer-webhook-bot.BOT_TOKEN']!;
   telegraf.launch();
 }

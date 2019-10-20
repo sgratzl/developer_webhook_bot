@@ -135,7 +135,7 @@ export default class GithubWebHook implements IWebHookHandler {
   }
 
   webhookMessage(server: string, chatId: string) {
-    const url = `${server}/developer_webhook_bot-github?chatid=${encodeURIComponent(chatId)}`;
+    const url = `${server}/developer-webhook-bot-github?chatid=${encodeURIComponent(chatId)}`;
     const secret = createSecret(chatId);
 
     return `Please use this webhook url:

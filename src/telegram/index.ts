@@ -1,7 +1,7 @@
 import Telegraf, {ContextMessageUpdate, Markup} from 'telegraf';
 import {IWebHookHandler} from '../webhooks/interfaces';
 
-const server = process.env.DOMAIN || process.env['developer_webhook_bot.DOMAIN']!;
+const server = process.env.DOMAIN || process.env['developer-webhook-bot.DOMAIN']!;
 
 function toArgs(ctx: ContextMessageUpdate) {
   const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
