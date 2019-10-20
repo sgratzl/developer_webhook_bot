@@ -1,8 +1,8 @@
 import {NowRequest, NowResponse} from '@now/node';
-import WebhooksApi, {WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadCommitComment, WebhookPayloadRelease, WebhookEvent, WebhookPayloadRepository, PayloadRepository, WebhookPayloadStatus} from '@octokit/webhooks';
+import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
+import {ok} from '../../_internal/responses';
 import {createSecret} from '../../_internal/secret';
 import {replyer} from '../../_internal/telegram';
-import {ok} from '../../_internal/responses';
 
 function link(url: string | null, title: string) {
   if (!url) {
@@ -127,7 +127,7 @@ function init(api: WebhooksApi, chatId: string) {
     }
     const branch = ref.substring('refs/heads/'.length);
 
-    const header = `🔨 ${link(payload.compare, `${commits.length} new commits`)} to \`${payload.repository.full_name}\`:${branch}`;
+    const header = `🔨 ${link(payload.compare, `${commits.length} new commit${commits.length > 1 ? 's' : ''}`)} to ${repoLink(payload)} on branch \`${branch}\``;
     const body: string[] = [];
     for (const commit of commits) {
       body.push(`${link(commit.url, commit.id.slice(0, 7))}: ${commit.message} by ${commit.author.name}`);
