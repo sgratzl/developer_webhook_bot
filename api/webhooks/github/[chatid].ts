@@ -63,9 +63,9 @@ function reviewLink(payload: WebhookPayloadPullRequestReview) {
   return link(review.html_url, `${repo.full_name}#${pr.number} ${pr.title}`);
 }
 
-function init(api: WebhooksApi, chatId: string) {
-  const reply = replyer(chatId);
+declare type IReplyer = (header: string, body?: string | null | undefined, footer?: string | undefined) => Promise<undefined>;
 
+function handleIssues(api: WebhooksApi, reply: IReplyer) {
   api.on('issues.opened', async ({payload}) => {
     return reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`, payload.issue.body);
   });
@@ -75,7 +75,9 @@ function init(api: WebhooksApi, chatId: string) {
   api.on('issues.reopened', async ({payload}) => {
     return reply(`🐛 Reopened Issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`);
   });
+}
 
+function handleComments(api: WebhooksApi, reply: IReplyer) {
   api.on('issue_comment.created', ({payload}) => {
     return reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.comment.user)}`, payload.comment.body);
   });
@@ -85,7 +87,9 @@ function init(api: WebhooksApi, chatId: string) {
   api.on('issue_comment.deleted', ({payload}) => {
     return reply(`💬❌ Comment on ${commentLink(payload)} Deleted\nby ${user(payload.comment.user)}`);
   });
+}
 
+function handlePullRequests(api: WebhooksApi, reply: IReplyer) {
   api.on('pull_request.opened', ({payload}) => {
     return reply(`🔌 New pull request ${prLink(payload)}\nby ${user(payload.pull_request.user)}`);
   });
@@ -118,7 +122,9 @@ function init(api: WebhooksApi, chatId: string) {
     const diff = `\`${payload.comment.path}\n${payload.comment.diff_hunk}\``;
     return reply(`💬 New pull request review comment ${commentLink(payload)}\nby ${user(payload.comment.user)}`, diff, payload.comment.body);
   });
+}
 
+function handlePush(api: WebhooksApi, reply: IReplyer) {
   api.on('push', ({payload}) => {
     const commits = payload.commits;
     const ref = payload.ref;
@@ -139,7 +145,9 @@ function init(api: WebhooksApi, chatId: string) {
     const diff = `\`${payload.comment.path}\n${payload.comment.line}\``;
     return reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.comment.user)}`, diff, payload.comment.body);
   });
+}
 
+function handleRelease(api: WebhooksApi, reply: IReplyer) {
   api.on('release.created', ({payload}) => {
     let sub = '';
     if (payload.release.draft) {
@@ -149,7 +157,9 @@ function init(api: WebhooksApi, chatId: string) {
     }
     return reply(`🎉 New ${sub}release ${releaseLink(payload)}\nby ${user(payload.release.author)}`, payload.release.body);
   });
+}
 
+function handleExtras(api: WebhooksApi, reply: IReplyer) {
   api.on('public', ({payload}) => {
     return reply(`🥂 ${repoLink(payload)} was made public`);
   });
@@ -166,7 +176,9 @@ function init(api: WebhooksApi, chatId: string) {
   api.on('fork', ({payload}) => {
     return reply(`⭐ ${repoLink(payload)} was forked by ${user(payload.sender)}`);
   });
+}
 
+function handleStatus(api: WebhooksApi, reply: IReplyer) {
   api.on('deployment_status', ({payload}) => {
     const status = payload.deployment_status;
     switch (status.state) {
@@ -203,17 +215,7 @@ function init(api: WebhooksApi, chatId: string) {
     }
     return undefined;
   });
-
-  // api.on('gollum', ({payload}) => {
-  //   //  Wiki page is created or updated.
-
-  // });
-  // api.on('*', async (event) => {
-  //   console.log(event.name, event.payload.action);
-  //   await telegram.sendMessage(chatId, JSON.stringify(event.payload).slice(0, 300));
-  // });
 }
-
 
 export const NAME = 'Github';
 
@@ -237,7 +239,15 @@ export default async function handle(req: NowRequest, res: NowResponse) {
       secret: createSecret(chatId),
   });
 
-  init(api, chatId);
+  const reply = replyer(chatId);
+
+  handleIssues(api, reply);
+  handleComments(api, reply);
+  handleExtras(api, reply);
+  handlePullRequests(api, reply);
+  handlePush(api, reply);
+  handleRelease(api, reply);
+  handleStatus(api, reply);
 
   await api.verifyAndReceive({
     id: req.headers['x-request-id'] as string,
