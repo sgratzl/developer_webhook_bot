@@ -1,5 +1,5 @@
 import {NowRequest, NowResponse} from '@now/node';
-import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadProject, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
+import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadMeta, WebhookPayloadProject, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
 import {ok} from '../../_internal/responses';
 import {createSecret} from '../../_internal/secret';
 import {replyer} from '../../_internal/telegram';
@@ -263,6 +263,14 @@ export default async function handle(req: NowRequest, res: NowResponse) {
   handleRelease(api, reply);
   handleStatus(api, reply);
   handleProjects(api, reply);
+
+  api.on('*', (event) => {
+    if (event.name === 'ping') {
+      const payload = event.payload as WebhookPayloadMeta;
+      return reply(`🚀 Webhook activated for ${repoLink(payload)}`);
+    }
+    return undefined;
+  });
 
   await api.verifyAndReceive({
     id: req.headers['x-request-id'] as string,
