@@ -1,9 +1,8 @@
-import WebhooksApi, {WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadIssueComment, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment} from '@octokit/webhooks';
-import {Telegram} from 'telegraf';
-import {createSecret, replyer} from '../_internal/utils';
-import {badRequest, ok, normalizeHeaders, getBody} from '../_internal/responses';
-import {IWebHookHandler} from './interfaces';
-import {NowRequest} from '@now/node';
+import {NowRequest, NowResponse} from '@now/node';
+import WebhooksApi, {WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment} from '@octokit/webhooks';
+import {createSecret} from '../../_internal/secret';
+import {replyer} from '../../_internal/telegram';
+import {ok} from '../../_internal/responses';
 
 function link(url: string, title: string) {
   return `[${title}](${url})`;
@@ -38,8 +37,8 @@ function reviewLink(payload: WebhookPayloadPullRequestReview) {
   return link(review.html_url, `${repo.full_name}#${pr.number} ${pr.title}`);
 }
 
-function init(api: WebhooksApi, chatId: string, telegram: Telegram) {
-  const reply = replyer(telegram, chatId);
+function init(api: WebhooksApi, chatId: string) {
+  const reply = replyer(chatId);
 
   api.on('issues.opened', async ({payload}) => {
     return reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`, payload.issue.body);
@@ -116,44 +115,37 @@ function init(api: WebhooksApi, chatId: string, telegram: Telegram) {
   // });
 }
 
-export default class GithubWebHook implements IWebHookHandler {
-  name = 'Github';
 
-  constructor(private readonly telegram: Telegram) {
+export const NAME = 'Github';
 
-  }
+export function webhookMessage(server: string, chatId: string) {
+  const url = `${server}/github/${encodeURIComponent(chatId)}`;
+  const secret = createSecret(chatId);
 
-  webhookMessage(server: string, chatId: string) {
-    const url = `${server}/github?chatid=${encodeURIComponent(chatId)}`;
-    const secret = createSecret(chatId);
+  return `Please use this webhook url:
+  [${url}](${url})
+    Content-Type: \`application/json\`
+    Secret: \`${secret}\`
+  `;
+}
 
-    return `Please use this webhook url:
-    [${url}](${url})
-      Content-Type: \`application/json\`
-      Secret: \`${secret}\`
-    `;
-  }
+export default async function handle(req: NowRequest, res: NowResponse) {
+  const chatid = req.query.chatid! as string;
 
-  async handle(request: NowRequest) {
-    if (!request.query || !request.query.chatid) {
-      return badRequest();
-    }
-    const headers = normalizeHeaders(request.headers);
-    const chatId = decodeURIComponent(event.queryStringParameters.chatid!);
+  const chatId = decodeURIComponent(chatid);
 
-    const api = new WebhooksApi({
+  const api = new WebhooksApi({
       secret: createSecret(chatId),
-    });
+  });
 
-    init(api, chatId, this.telegram);
+  init(api, chatId);
 
-    await api.verifyAndReceive({
-      id: headers['x-request-id'],
-      name: headers['x-github-event'],
-      signature: headers['x-hub-signature'],
-      payload: getBody(event)
-    })
+  await api.verifyAndReceive({
+    id: req.headers['x-request-id'] as string,
+    name: req.headers['x-github-event'] as string,
+    signature: req.headers['x-hub-signature'] as string,
+    payload: req.body
+  })
 
-    return ok();
-  }
+  return ok(res);
 }
