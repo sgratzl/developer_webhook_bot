@@ -1,8 +1,8 @@
 import {IWebHookHandler} from "./interfaces";
 import {Telegram} from "telegraf";
 import {APIGatewayProxyEvent} from "aws-lambda";
-import {badRequest, ok, getBody} from "../responses";
-import {replyer} from "../utils";
+import {badRequest, ok, getBody} from "../_internal/responses";
+import {replyer} from "../_internal/utils";
 
 interface IMessage {
   fallback: string;

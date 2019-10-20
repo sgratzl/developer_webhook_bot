@@ -1,10 +1,9 @@
 import Telegraf from 'telegraf';
-import {APIGatewayProxyHandler} from 'aws-lambda';
-import {config} from 'dotenv';
 import {init} from './telegram';
-import {badRequest, getBody, ok} from './responses';
+import {ok} from './_internal/responses';
 import GithubWebHook from './webhooks/github';
 import CircleCIWebHook from './webhooks/circleci';
+import {NowRequest, NowResponse} from '@now/node';
 
 
 const telegraf = new Telegraf(process.env.BOT_TOKEN!, {
@@ -20,20 +19,11 @@ init(telegraf, [
   circleciHandler
 ]);
 
-export const bot: APIGatewayProxyHandler = async (event) => {
-  if (!event.body || event.body.length === 0) {
-    return badRequest();
-  }
-  const body = getBody(event);
-  await telegraf.handleUpdate(body);
-  return ok();
+export default async function handle(req: NowRequest, res: NowResponse) {
+  await telegraf.handleUpdate(req.body);
+  
+  return ok(res);
 };
 
 export const github = githubHandler.handle.bind(githubHandler);
 export const circleci = circleciHandler.handle.bind(circleciHandler);
-
-if (require.main === module) {
-  config();
-  telegraf.token = process.env['developer-webhook-bot.BOT_TOKEN']!;
-  telegraf.launch();
-}

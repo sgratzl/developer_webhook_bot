@@ -1,0 +1,6 @@
+{
+  "env": {
+    "BOT_TOKEN": "@bot_token",
+    "WEBHOOK_SECRET": "@webhook_secret"
+  }
+}

@@ -1,9 +1,9 @@
 import WebhooksApi, {WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadIssueComment, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment} from '@octokit/webhooks';
 import {Telegram} from 'telegraf';
-import {createSecret, replyer} from '../utils';
-import {badRequest, ok, normalizeHeaders, getBody} from '../responses';
+import {createSecret, replyer} from '../_internal/utils';
+import {badRequest, ok, normalizeHeaders, getBody} from '../_internal/responses';
 import {IWebHookHandler} from './interfaces';
-import {APIGatewayProxyEvent} from 'aws-lambda';
+import {NowRequest} from '@now/node';
 
 function link(url: string, title: string) {
   return `[${title}](${url})`;
@@ -134,11 +134,11 @@ export default class GithubWebHook implements IWebHookHandler {
     `;
   }
 
-  async handle(event: APIGatewayProxyEvent) {
-    if (!event.queryStringParameters || !event.queryStringParameters.chatid) {
+  async handle(request: NowRequest) {
+    if (!request.query || !request.query.chatid) {
       return badRequest();
     }
-    const headers = normalizeHeaders(event.headers);
+    const headers = normalizeHeaders(request.headers);
     const chatId = decodeURIComponent(event.queryStringParameters.chatid!);
 
     const api = new WebhooksApi({
