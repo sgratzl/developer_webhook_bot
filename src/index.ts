@@ -6,23 +6,22 @@ import {badRequest, getBody, ok} from './responses';
 import GithubWebHook from './webhooks/github';
 
 
-const bot = new Telegraf(process.env.BOT_TOKEN!, {
+const telegraf = new Telegraf(process.env.BOT_TOKEN!, {
 });
 
-const githubHandler = new GithubWebHook(bot.telegram);
+const githubHandler = new GithubWebHook(telegraf.telegram);
 
 
-init(bot, [
+init(telegraf, [
   githubHandler
 ]);
 
-export const bothook: APIGatewayProxyHandler = async (event, context) => {
-  console.log(event, context);
+export const bot: APIGatewayProxyHandler = async (event) => {
   if (!event.body || event.body.length === 0) {
     return badRequest();
   }
   const body = getBody(event);
-  await bot.handleUpdate(body);
+  await telegraf.handleUpdate(body);
   return ok();
 };
 
@@ -30,6 +29,6 @@ export const github = githubHandler.handle.bind(githubHandler);
 
 if (require.main === module) {
   config();
-  bot.token = process.env['developer_webhook_bot.BOT_TOKEN']!;
-  bot.launch();
+  telegraf.token = process.env['developer_webhook_bot.BOT_TOKEN']!;
+  telegraf.launch();
 }

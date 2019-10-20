@@ -1,17 +1,27 @@
-import Telegraf, {ContextMessageUpdate} from 'telegraf';
+import Telegraf, {ContextMessageUpdate, Markup} from 'telegraf';
 import {IWebHookHandler} from '../webhooks/interfaces';
+
+const server = process.env.DOMAIN || process.env['developer_webhook_bot.DOMAIN']!;
 
 export function init(bot: Telegraf<ContextMessageUpdate>, webhooks: IWebHookHandler[]) {
   bot.start((ctx) => {
-    ctx.reply('Welcome');
+    ctx.reply('This bot forwards webhooks as chat messages');
   });
-  bot.help((ctx) => ctx.reply('Send me a sticker'));
   bot.command('webhook', (ctx) => {
-    const chatId = ctx.chat!.id;
-
+    const buttons = webhooks.map((webhook) => {
+      return Markup.callbackButton(webhook.name, webhook.name);
+    });
+    return ctx.reply('Available Webhook Providers', {
+      reply_markup: Markup.inlineKeyboard(buttons)
+    });
   });
 
-  bot.on('sticker', (ctx) => ctx.reply('👍'));
-
+  for (const webhook of webhooks) {
+    bot.action(webhook.name, (ctx) => {
+      const msg = webhook.webhookMessage(server, String(ctx.chat!.id));
+      console.log(msg);
+      ctx.replyWithMarkdown(msg);
+    });
+  }
 
 }

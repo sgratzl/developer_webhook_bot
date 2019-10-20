@@ -19,7 +19,8 @@
     "@octokit/webhooks": "^6.3.2",
     "@types/dotenv": "^6.1.1",
     "dotenv": "^8.2.0",
-    "telegraf": "^3.33.0"
+    "telegraf": "^3.33.0",
+    "telegraf-inline-menu": "^3.6.3"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.33",

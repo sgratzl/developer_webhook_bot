@@ -29,18 +29,20 @@ provider:
 
   environment:
     BOT_TOKEN: ${ssm:developer_webhook_bot.BOT_TOKEN}
+    WEBHOOK_SECRET: ${ssm:developer_webhook_bot.WEBHOOK_SECRET}
+    DOMAIN: ${ssm:developer_webhook_bot.DOMAIN}
 
 functions:
   bot:
-    handler: build.bothook
+    handler: build.bot
     timeout: 30
     events:
       - http: POST /developer_webhook_bot
-  webhook:
-    handler: build.webhook
+  github:
+    handler: build.github
     timeout: 30
     events:
-      - http: POST /developer_webhook_bot-hook
+      - http: POST /developer_webhook_bot-github
 
 plugins:
   - serverless-offline-ssm
