@@ -41,13 +41,13 @@ function commentLink(payload: WebhookPayloadIssueComment | WebhookPayloadPullReq
 function commitCommentLink(payload: WebhookPayloadCommitComment) {
   const base = payload.comment;
   const repo = payload.repository;
-  return link(payload.comment.html_url, `${repo.full_name}@${base.commit_id}`);
+  return link(payload.comment.html_url, `${repo.full_name}@${base.commit_id.slice(0, 7)}`);
 }
 
 function commitLink(payload: WebhookPayloadStatus) {
   const base = payload.commit;
   const repo = payload.repository;
-  return link(base.html_url, `${repo.full_name}@${base.sha.slice(0, 7)}}`);
+  return link(base.html_url, `${repo.full_name}@${base.sha.slice(0, 7)}`);
 }
 
 function prLink(payload: WebhookPayloadPullRequest) {
@@ -195,11 +195,11 @@ function init(api: WebhooksApi, chatId: string) {
   api.on('check_run.completed', ({payload}) => {
     switch (payload.check_run.conclusion as unknown as string) {
       case 'success':
-        return reply(`☀ Check Run ${payload.check_run.name} in ${repoLink(payload)} was a ${link(payload.check_run.html_url, 'success')}`, payload.check_run.output.summary);
+        return reply(`☀ Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} was a ${link(payload.check_run.html_url, 'success')}`, payload.check_run.output.summary);
       case 'failure':
-        return reply(`🌩 Check Run ${payload.check_run.name} in ${repoLink(payload)} ${link(payload.check_run.html_url, 'failed')}`, payload.check_run.output.summary);
+        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'failed')}`, payload.check_run.output.summary);
       case 'action_required':
-        return reply(`🌩 Check Run ${payload.check_run.name} in ${repoLink(payload)} ${link(payload.check_run.html_url, 'requires action')}`, payload.check_run.output.summary);
+        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'requires action')}`, payload.check_run.output.summary);
     }
     return undefined;
   });
