@@ -19,8 +19,7 @@
   "scripts": {
     "compile": "tsc",
     "watch": "tsc --watch",
-    "build": "npm run compile",
-    "postinstall": "npm run build"
+    "build": "npm run compile"
   },
   "dependencies": {
     "@octokit/webhooks": "^6.3.2",
