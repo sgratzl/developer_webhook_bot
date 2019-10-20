@@ -11,7 +11,7 @@ const webhooks = [
 ]
 
 export default async function handle(req: NowRequest, res: NowResponse) {
-  const server = `${req.headers.host}/api`;
+  const server = `https://${req.headers.host}/api`;
 
   const bot = new Telegraf(process.env.BOT_TOKEN!, {
     username: 'developer_webhook_bot'

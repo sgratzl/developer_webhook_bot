@@ -147,5 +147,5 @@ export default async function handle(req: NowRequest, res: NowResponse) {
     payload: req.body
   })
 
-  return ok(res);
+  return res.json({headers: req.headers, body: req.body});
 }
