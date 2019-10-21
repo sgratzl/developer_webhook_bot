@@ -11,12 +11,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sgratzl/webhook-bot.git"
+    "url": "git+https://github.com/sgratzl/developer_webhook_bot.git"
   },
   "bugs": {
-    "url": "https://github.com/sgratzl/webhook-bot/issues"
+    "url": "https://github.com/sgratzl/developer_webhook_bot/issues"
   },
-  "homepage": "https://github.com/sgratzl/webhook-bot#readme",
+  "homepage": "https://github.com/sgratzl/developer_webhook_bot#readme",
   "engines": {
     "node": "10.x"
   },
