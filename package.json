@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@octokit/webhooks": "^6.3.2",
+    "node-gitlab-webhook": "^1.0.6",
     "telegraf": "^3.33.0"
   },
   "devDependencies": {
