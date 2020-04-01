@@ -4,7 +4,7 @@ import {replyer} from '../../_internal/telegram';
 import { createSecret } from '../../_internal/secret';
 
 interface INetlifyMessage {
-
+  dummy: string;
 }
 
 export const NAME = 'Netlify';
