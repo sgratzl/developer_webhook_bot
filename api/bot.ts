@@ -3,13 +3,15 @@ import Telegraf, {Markup} from 'telegraf';
 import * as circleci from './webhooks/circleci/[chatid]';
 import * as github from './webhooks/github/[chatid]';
 import * as gitlab from './webhooks/gitlab/[chatid]';
+import * as netlify from './webhooks/netlify/[chatid]';
 import {ok} from './_internal/responses';
 import {toArgs} from './_internal/telegram';
 
 const webhooks = [
   github,
   gitlab,
-  circleci
+  circleci,
+  netlify
 ];
 
 let serverUrl = '';
