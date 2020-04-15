@@ -27,14 +27,21 @@ function releaseLink(payload: WebhookPayloadRelease) {
   return link(release.html_url, `${repo.full_name} ${release.name}`);
 }
 
-function repoLink(payload: {repository: PayloadRepository}) {
+function repoLink(payload: {repository?: PayloadRepository, organization?: {login: string}}) {
   const repo = payload.repository;
-  return link(repo.html_url, `${repo.full_name}`);
+  if (repo) {
+    return link(repo.html_url, repo.full_name);
+  }
+  const org = payload.organization;
+  if (org) {
+    return link(`https://github.com/${org.login}`, org.login);
+  }
+  return `???`;
 }
 
 function projectLink(payload: WebhookPayloadProject) {
   const project = payload.project;
-  return link(project.html_url, `${project.name}`);
+  return link(project.html_url, project.name);
 }
 
 function commentLink(payload: WebhookPayloadIssueComment | WebhookPayloadPullRequestReviewComment) {
@@ -187,7 +194,7 @@ function handleProjects(api: WebhooksApi, reply: IReplyer) {
   api.on('project.created', ({payload}) => {
     return reply(`📘 Project ${projectLink(payload)} created in ${repoLink(payload)} by ${user(payload.project.creator)}`, payload.project.body);
   });
-  api.on('project_card.created', ({payload}) => {
+  api.on('project_card.created', ({ payload }) => {
     return reply(`📘 Project Card created in ${repoLink(payload)} by ${user(payload.project_card.creator)}`, payload.project_card.note);
   });
 }
