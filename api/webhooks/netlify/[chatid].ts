@@ -71,6 +71,10 @@ export default async function handle(req: NowRequest, res: NowResponse) {
     case 'failed':
       await reply(`🌩 ${url} failed to ${link(deploymentUrl, 'deploy')}`);
       break;
+    default:
+      await reply(`? ${url} ${body.state} to ${link(deploymentUrl, 'deploy')}`);
+      break;
+
   }
 
   return ok(res);
