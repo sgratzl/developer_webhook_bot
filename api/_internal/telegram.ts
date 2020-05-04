@@ -1,4 +1,4 @@
-import {Telegram, ContextMessageUpdate} from 'telegraf';
+import {Telegram, Context} from 'telegraf';
 
 const DEFAULT_TRUNCATION_LIMIT = 4096;
 const TRUNCATED_MESSAGE = '**Truncated message, open on GitHub to read more**';
@@ -13,7 +13,7 @@ export function truncateMessage(header: string, body: string, footer = '') {
 
 }
 
-export function toArgs(ctx: ContextMessageUpdate) {
+export function toArgs(ctx: Context) {
   const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
   const parts = regex.exec(ctx.message!.text!.trim());
   if (!parts) {
