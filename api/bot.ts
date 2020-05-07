@@ -4,6 +4,7 @@ import * as circleci from './webhooks/circleci/[chatid]';
 import * as github from './webhooks/github/[chatid]';
 import * as gitlab from './webhooks/gitlab/[chatid]';
 import * as netlify from './webhooks/netlify/[chatid]';
+import * as generic from './webhooks/generic/[chatid]';
 import {ok} from './_internal/responses';
 import {toArgs} from './_internal/telegram';
 
@@ -11,7 +12,8 @@ const webhooks = [
   github,
   gitlab,
   circleci,
-  netlify
+  netlify,
+  generic
 ];
 
 let serverUrl = '';
