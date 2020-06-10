@@ -2,13 +2,13 @@ import {NowRequest, NowResponse} from '@now/node';
 import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadMeta, WebhookPayloadProject, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
 import {ok} from '../../_internal/responses';
 import {createSecret} from '../../_internal/secret';
-import {replyer} from '../../_internal/telegram';
+import {replyer, escape} from '../../_internal/telegram';
 
 function link(url: string | null, title: string) {
   if (!url) {
-    return title;
+    return escape(title);
   }
-  return `[${title}](${url})`;
+  return `[${escape(title)}](${url})`;
 }
 
 function user(user: WebhookPayloadIssuesIssueUser) {
@@ -79,7 +79,7 @@ declare type IReplyer = (header: string, body?: string | null | undefined, foote
 
 function handleIssues(api: WebhooksApi, reply: IReplyer) {
   api.on('issues.opened', async ({payload}) => {
-    return reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`, payload.issue.body);
+    return reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`, escape(payload.issue.body));
   });
   api.on('issues.closed', async ({payload}) => {
     return reply(`🐛❌ Closed Issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`);
@@ -91,10 +91,10 @@ function handleIssues(api: WebhooksApi, reply: IReplyer) {
 
 function handleComments(api: WebhooksApi, reply: IReplyer) {
   api.on('issue_comment.created', ({payload}) => {
-    return reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.comment.user)}`, payload.comment.body);
+    return reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
   });
   api.on('issue_comment.edited', ({payload}) => {
-    return reply(`💬📝 Comment on ${commentLink(payload)} Edited\nby ${user(payload.comment.user)}`, payload.comment.body);
+    return reply(`💬📝 Comment on ${commentLink(payload)} Edited\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
   });
   api.on('issue_comment.deleted', ({payload}) => {
     return reply(`💬❌ Comment on ${commentLink(payload)} Deleted\nby ${user(payload.comment.user)}`);
@@ -120,19 +120,19 @@ function handlePullRequests(api: WebhooksApi, reply: IReplyer) {
     const review = payload.review;
     switch (review.state) {
       case 'commented':
-        return reply(`💬 New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, review.body);
+        return reply(`💬 New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, escape(review.body));
       case 'approved':
-        return reply(`✅ New pull request review ${reviewLink(payload)}\nApproved by ${user(review.user)}`, review.body);
+        return reply(`✅ New pull request review ${reviewLink(payload)}\nApproved by ${user(review.user)}`, escape(review.body));
       case 'request_changes':
-        return reply(`‼ New pull request review ${reviewLink(payload)}\nRequest Changes by ${user(review.user)}`, review.body);
+        return reply(`‼ New pull request review ${reviewLink(payload)}\nRequest Changes by ${user(review.user)}`, escape(review.body));
       default:
-        return reply(`❓ New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, review.body);
+        return reply(`❓ New pull request review ${reviewLink(payload)}\nCommented by ${user(review.user)}`, escape(review.body));
     }
   });
 
   api.on('pull_request_review_comment.created', ({payload}) => {
     const diff = `\`${payload.comment.path}\n${payload.comment.diff_hunk}\``;
-    return reply(`💬 New pull request review comment ${commentLink(payload)}\nby ${user(payload.comment.user)}`, diff, payload.comment.body);
+    return reply(`💬 New pull request review comment ${commentLink(payload)}\nby ${user(payload.comment.user)}`, diff, escape(payload.comment.body));
   });
 }
 
@@ -148,14 +148,14 @@ function handlePush(api: WebhooksApi, reply: IReplyer) {
     const header = `🔨 ${link(payload.compare, `${commits.length} new commit${commits.length > 1 ? 's' : ''}`)} to ${repoLink(payload)} on branch \`${branch}\``;
     const body: string[] = [];
     for (const commit of commits) {
-      body.push(`${link(commit.url, commit.id.slice(0, 7))}: ${commit.message} by ${commit.author.name}`);
+      body.push(`${link(commit.url, commit.id.slice(0, 7))}: ${escape(commit.message)} by ${escape(commit.author.name)}`);
     }
     return reply(header, body.join('\n'));
   });
 
   api.on('commit_comment.created', ({payload}) => {
     const diff = `\`${payload.comment.path}\n${payload.comment.line}\``;
-    return reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.comment.user)}`, diff, payload.comment.body);
+    return reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.comment.user)}`, diff, escape(payload.comment.body));
   });
 }
 
@@ -167,7 +167,7 @@ function handleRelease(api: WebhooksApi, reply: IReplyer) {
     } else if (payload.release.prerelease) {
       sub = 'pre';
     }
-    return reply(`🎉 New ${sub}release ${releaseLink(payload)}\nby ${user(payload.release.author)}`, payload.release.body);
+    return reply(`🎉 New ${sub}release ${releaseLink(payload)}\nby ${user(payload.release.author)}`, escape(payload.release.body));
   });
 }
 
@@ -192,10 +192,10 @@ function handleExtras(api: WebhooksApi, reply: IReplyer) {
 
 function handleProjects(api: WebhooksApi, reply: IReplyer) {
   api.on('project.created', ({payload}) => {
-    return reply(`📘 Project ${projectLink(payload)} created in ${repoLink(payload)} by ${user(payload.project.creator)}`, payload.project.body);
+    return reply(`📘 Project ${projectLink(payload)} created in ${repoLink(payload)} by ${user(payload.project.creator)}`, escape(payload.project.body));
   });
   api.on('project_card.created', ({ payload }) => {
-    return reply(`📘 Project Card created in ${repoLink(payload)} by ${user(payload.project_card.creator)}`, payload.project_card.note);
+    return reply(`📘 Project Card created in ${repoLink(payload)} by ${user(payload.project_card.creator)}`, escape(payload.project_card.note));
   });
 }
 
@@ -206,9 +206,9 @@ function handleStatus(api: WebhooksApi, reply: IReplyer) {
       case 'success':
         return reply(`☀ ${repoLink(payload)} was successfully ${link(status.deployment_url, 'deployed')}`);
       case 'failure':
-        return reply(`🌩 ${repoLink(payload)} failed to ${link(status.deployment_url, 'deploy')}`, status.description);
+        return reply(`🌩 ${repoLink(payload)} failed to ${link(status.deployment_url, 'deploy')}`, escape(status.description));
       case 'error':
-        return reply(`🌩 ${repoLink(payload)} errored while ${link(status.deployment_url, 'deploying')}`, status.description);
+        return reply(`🌩 ${repoLink(payload)} errored while ${link(status.deployment_url, 'deploying')}`, escape(status.description));
     }
     return undefined;
   });
@@ -216,11 +216,11 @@ function handleStatus(api: WebhooksApi, reply: IReplyer) {
   api.on('status', ({payload}) => {
     switch (payload.state) {
       case 'success':
-        return reply(`☀ Commit ${commitLink(payload)} state is ${link(payload.target_url, 'successful')}`, payload.description);
+        return reply(`☀ Commit ${commitLink(payload)} state is ${link(payload.target_url, 'successful')}`, escape(payload.description));
       case 'failure':
-        return reply(`🌩 Commit ${commitLink(payload)} state is ${link(payload.target_url, 'failure')}`, payload.description);
+        return reply(`🌩 Commit ${commitLink(payload)} state is ${link(payload.target_url, 'failure')}`, escape(payload.description));
       case 'error':
-        return reply(`🌩 Commit ${commitLink(payload)} state is ${link(payload.target_url, 'error')}`, payload.description);
+        return reply(`🌩 Commit ${commitLink(payload)} state is ${link(payload.target_url, 'error')}`, escape(payload.description));
     }
     return undefined;
   });
@@ -228,11 +228,11 @@ function handleStatus(api: WebhooksApi, reply: IReplyer) {
   api.on('check_run.completed', ({payload}) => {
     switch (payload.check_run.conclusion as unknown as string) {
       case 'success':
-        return reply(`☀ Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} was a ${link(payload.check_run.html_url, 'success')}`, payload.check_run.output.summary);
+        return reply(`☀ Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} was a ${link(payload.check_run.html_url, 'success')}`, escape(payload.check_run.output.summary));
       case 'failure':
-        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'failed')}`, payload.check_run.output.summary);
+        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'failed')}`, escape(payload.check_run.output.summary));
       case 'action_required':
-        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'requires action')}`, payload.check_run.output.summary);
+        return reply(`🌩 Check Run \`${payload.check_run.name}\` in ${repoLink(payload)} ${link(payload.check_run.html_url, 'requires action')}`, escape(payload.check_run.output.summary));
     }
     return undefined;
   });

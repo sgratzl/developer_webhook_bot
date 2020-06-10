@@ -1,6 +1,6 @@
 import { NowRequest, NowResponse } from '@now/node';
 import { ok } from '../../_internal/responses';
-import { replyer } from '../../_internal/telegram';
+import { replyer, escape } from '../../_internal/telegram';
 import { createSecret } from '../../_internal/secret';
 
 interface INetlifyMessage {
@@ -43,9 +43,9 @@ export function webhookMessage(server: string, chatId: string) {
 
 function link(url: string | null, title: string) {
   if (!url) {
-    return title;
+    return escape(title);
   }
-  return `[${title}](${url})`;
+  return `[${escape(title)}](${url})`;
 }
 
 export default async function handle(req: NowRequest, res: NowResponse) {

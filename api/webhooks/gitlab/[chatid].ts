@@ -2,13 +2,13 @@ import {NowRequest, NowResponse} from '@now/node';
 import createHandler from 'node-gitlab-webhook';
 import {GitLabHooks, IssueAttributes, MergeRequestAttributes, NoteEvent, PipelineAttributes, Project, User, WikiPageAttributes} from 'node-gitlab-webhook/interfaces';
 import {createSecret} from '../../_internal/secret';
-import {replyer} from '../../_internal/telegram';
+import {replyer, escape} from '../../_internal/telegram';
 
 function link(url: string | null, title: string) {
   if (!url) {
-    return title;
+    return escape(title);
   }
-  return `[${title}](${url})`;
+  return `[${escape(title)}](${url})`;
 }
 
 function user(user: User) {
@@ -70,7 +70,7 @@ function handleIssues(api: GitLabHooks, reply: IReplyer) {
     const issue = payload.object_attributes;
     switch (issue.action) {
       case 'open':
-        reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.user)}`, issue.description);
+        reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.user)}`, escape(issue.description));
         break;
       case 'closed':
         reply(`🐛❌ Closed Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
@@ -90,16 +90,16 @@ function handleComments(api: GitLabHooks, reply: IReplyer) {
     const note = payload.object_attributes;
     switch (note.noteable_type.toLowerCase().replace(/_/, '_')) {
       case 'commit':
-        reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.user)}`, note.st_diff.diff, note.note);
+        reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.user)}`, note.st_diff.diff, escape(note.note));
         break;
       case 'issue':
-        reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.user)}`, note.note);
+        reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
       case 'merge_request':
-        reply(`💬 New merge request review comment ${commentLink(payload)}\nby ${user(payload.user)}`, note.note);
+        reply(`💬 New merge request review comment ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
       case 'snippet':
-        reply(`💬 New snippet comment ${snippetCommentLink(payload)}\nby ${user(payload.user)}`, note.note);
+        reply(`💬 New snippet comment ${snippetCommentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
     }
   });
@@ -154,16 +154,16 @@ function handleWiki(api: GitLabHooks, reply: IReplyer) {
     const wiki = payload.object_attributes;
     switch (wiki.action) {
       case 'open':
-        reply(`📘 Wiki page ${wikiLink(payload)} created in ${projectLink(payload)} by ${user(payload.user)}`, wiki.content);
+        reply(`📘 Wiki page ${wikiLink(payload)} created in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       case 'delete':
-        reply(`📘❌ Deleted Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, wiki.content);
+        reply(`📘❌ Deleted Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       case 'update':
-        reply(`📘 Updated Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, wiki.content);
+        reply(`📘 Updated Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       default:
-        reply(`📘 ${wiki.action}? Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, wiki.content);
+        reply(`📘 ${wiki.action}? Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
     }
   });

@@ -3,6 +3,13 @@ import {Telegram, Context} from 'telegraf';
 const DEFAULT_TRUNCATION_LIMIT = 4096;
 const TRUNCATED_MESSAGE = '**Truncated message, open on GitHub to read more**';
 
+export function escape(text?: string | null) {
+  if (!text) {
+    return '';
+  }
+  return text.replace(/([[]\`*_])/g, '\\$1');
+}
+
 export function truncateMessage(header: string, body: string, footer = '') {
   const full = `${header}\n\n${body}\n${footer}`;
   if (full.length < DEFAULT_TRUNCATION_LIMIT) {

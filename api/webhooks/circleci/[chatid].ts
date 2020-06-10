@@ -1,6 +1,6 @@
 import {NowRequest, NowResponse} from '@now/node';
 import {ok} from '../../_internal/responses';
-import {replyer} from '../../_internal/telegram';
+import {replyer, escape} from '../../_internal/telegram';
 
 interface IMessage {
   fallback: string;
@@ -32,7 +32,7 @@ export default async function handle(req: NowRequest, res: NowResponse) {
 
   const reply = replyer(chatId);
 
-  await reply(body.text);
+  await reply(escape(body.text));
 
   return ok(res);
 }
