@@ -24,7 +24,7 @@ function issueLink(payload: WebhooksApi.WebhookPayloadIssues) {
 function releaseLink(payload: WebhooksApi.WebhookPayloadRelease) {
   const release = payload.release;
   const repo = payload.repository;
-  return link(release.html_url, `${repo.full_name} ${release.name ?? ''}`);
+  return link(release.html_url, `${repo.full_name} ${release.name || ''}`);
 }
 
 function repoLink(payload: {repository?: WebhooksApi.PayloadRepository, organization?: {login: string}}) {
@@ -36,7 +36,7 @@ function repoLink(payload: {repository?: WebhooksApi.PayloadRepository, organiza
   if (org) {
     return link(`https://github.com/${org.login}`, org.login);
   }
-  return '???';
+  return '||?';
 }
 
 function projectLink(payload: WebhooksApi.WebhookPayloadProject) {
@@ -154,7 +154,7 @@ function handlePush(api: WebhooksApi, reply: IReplyer) {
   });
 
   api.on('commit_comment.created', ({payload}) => {
-    const diff = `\`${payload.comment.path ?? ''}\n${payload.comment.line?? '?'}\``;
+    const diff = `\`${payload.comment.path || ''}\n${payload.comment.line || '?'}\``;
     return reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.comment.user)}`, diff, escape(payload.comment.body));
   });
 }
