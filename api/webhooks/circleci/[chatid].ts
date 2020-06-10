@@ -16,14 +16,14 @@ interface ICircleCIMessage {
 
 export const NAME = 'CircleCI';
 
-export function webhookMessage(server: string, chatId: string) {
+export function webhookMessage(server: string, chatId: string): string {
   const url = `${server}/webhooks/circleci/${encodeURIComponent(chatId)}`;
   return `Please use this webhook url:
   [${url}](${url})
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse) {
+export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);

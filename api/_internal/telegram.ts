@@ -3,14 +3,14 @@ import {Telegram, Context} from 'telegraf';
 const DEFAULT_TRUNCATION_LIMIT = 4096;
 const TRUNCATED_MESSAGE = '**Truncated message, open on GitHub to read more**';
 
-export function escape(text?: string | null) {
+export function escape(text?: string | null): string {
   if (!text) {
     return '';
   }
-  return text.replace(/([[]\`*_])/g, '\\$1');
+  return text.replace(/([[]`*_])/g, '\\$1');
 }
 
-export function truncateMessage(header: string, body: string, footer = '') {
+export function truncateMessage(header: string, body: string, footer = ''): string {
   const full = `${header}\n\n${body}\n${footer}`;
   if (full.length < DEFAULT_TRUNCATION_LIMIT) {
     return full;
@@ -20,7 +20,7 @@ export function truncateMessage(header: string, body: string, footer = '') {
 
 }
 
-export function toArgs(ctx: Context) {
+export function toArgs(ctx: Context): string[] {
   const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
   const parts = regex.exec(ctx.message!.text!.trim());
   if (!parts) {
@@ -37,8 +37,8 @@ export function replyer(chatId: string) {
     const msg = body ? truncateMessage(header, body, footer) : truncateMessage('', header);
 
     return telegram.sendMessage(chatId, msg, {
-      disable_web_page_preview: true, // eslint-disable-line @typescript-eslint/camelcase
-      parse_mode: 'Markdown' // eslint-disable-line @typescript-eslint/camelcase
+      disable_web_page_preview: true,
+      parse_mode: 'Markdown'
     }).then(() => undefined);
   };
 }

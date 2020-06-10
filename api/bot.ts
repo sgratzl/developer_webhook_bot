@@ -40,7 +40,7 @@ bot.command('webhook', (ctx) => {
     return Markup.callbackButton(webhook.NAME, webhook.NAME);
   });
   return ctx.reply('Available Webhook Providers', {
-    reply_markup: Markup.inlineKeyboard(buttons) // eslint-disable-line @typescript-eslint/camelcase
+    reply_markup: Markup.inlineKeyboard(buttons)
   });
 });
 
@@ -52,8 +52,8 @@ for (const webhook of webhooks) {
 }
 
 
-export default async function handle(req: NowRequest, res: NowResponse) {
-  serverUrl = `https://${req.headers.host}/api`;
+export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+  serverUrl = `https://${req.headers.host!}/api`;
 
   await bot.handleUpdate(req.body);
 

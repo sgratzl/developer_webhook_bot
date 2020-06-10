@@ -1,5 +1,5 @@
 import {NowRequest, NowResponse} from '@now/node';
-import WebhooksApi, {PayloadRepository, WebhookPayloadCommitComment, WebhookPayloadIssueComment, WebhookPayloadIssues, WebhookPayloadIssuesIssueUser, WebhookPayloadMeta, WebhookPayloadProject, WebhookPayloadPullRequest, WebhookPayloadPullRequestReview, WebhookPayloadPullRequestReviewComment, WebhookPayloadRelease, WebhookPayloadStatus} from '@octokit/webhooks';
+import WebhooksApi from '@octokit/webhooks';
 import {ok} from '../../_internal/responses';
 import {createSecret} from '../../_internal/secret';
 import {replyer, escape} from '../../_internal/telegram';
@@ -11,23 +11,23 @@ function link(url: string | null, title: string) {
   return `[${escape(title)}](${url})`;
 }
 
-function user(user: WebhookPayloadIssuesIssueUser) {
+function user(user: WebhooksApi.WebhookPayloadIssuesIssueUser) {
   return link(user.html_url, `@${user.login}`);
 }
 
-function issueLink(payload: WebhookPayloadIssues) {
+function issueLink(payload: WebhooksApi.WebhookPayloadIssues) {
   const issue = payload.issue;
   const repo = payload.repository;
   return link(issue.html_url, `${repo.full_name}#${issue.number} ${issue.title}`);
 }
 
-function releaseLink(payload: WebhookPayloadRelease) {
+function releaseLink(payload: WebhooksApi.WebhookPayloadRelease) {
   const release = payload.release;
   const repo = payload.repository;
-  return link(release.html_url, `${repo.full_name} ${release.name}`);
+  return link(release.html_url, `${repo.full_name} ${release.name ?? ''}`);
 }
 
-function repoLink(payload: {repository?: PayloadRepository, organization?: {login: string}}) {
+function repoLink(payload: {repository?: WebhooksApi.PayloadRepository, organization?: {login: string}}) {
   const repo = payload.repository;
   if (repo) {
     return link(repo.html_url, repo.full_name);
@@ -36,39 +36,39 @@ function repoLink(payload: {repository?: PayloadRepository, organization?: {logi
   if (org) {
     return link(`https://github.com/${org.login}`, org.login);
   }
-  return `???`;
+  return '???';
 }
 
-function projectLink(payload: WebhookPayloadProject) {
+function projectLink(payload: WebhooksApi.WebhookPayloadProject) {
   const project = payload.project;
   return link(project.html_url, project.name);
 }
 
-function commentLink(payload: WebhookPayloadIssueComment | WebhookPayloadPullRequestReviewComment) {
-  const base = (payload as WebhookPayloadIssueComment).issue || (payload as WebhookPayloadPullRequestReviewComment).pull_request;
+function commentLink(payload: WebhooksApi.WebhookPayloadIssueComment | WebhooksApi.WebhookPayloadPullRequestReviewComment) {
+  const base = (payload as WebhooksApi.WebhookPayloadIssueComment).issue || (payload as WebhooksApi.WebhookPayloadPullRequestReviewComment).pull_request;
   const repo = payload.repository;
   return link(payload.comment.html_url, `${repo.full_name}#${base.number} ${base.title}`);
 }
 
-function commitCommentLink(payload: WebhookPayloadCommitComment) {
+function commitCommentLink(payload: WebhooksApi.WebhookPayloadCommitComment) {
   const base = payload.comment;
   const repo = payload.repository;
   return link(payload.comment.html_url, `${repo.full_name}@${base.commit_id.slice(0, 7)}`);
 }
 
-function commitLink(payload: WebhookPayloadStatus) {
+function commitLink(payload: WebhooksApi.WebhookPayloadStatus) {
   const base = payload.commit;
   const repo = payload.repository;
   return link(base.html_url, `${repo.full_name}@${base.sha.slice(0, 7)}`);
 }
 
-function prLink(payload: WebhookPayloadPullRequest) {
+function prLink(payload: WebhooksApi.WebhookPayloadPullRequest) {
   const pr = payload.pull_request;
   const repo = payload.repository;
   return link(pr.html_url, `${repo.full_name}#${pr.number} ${pr.title}`);
 }
 
-function reviewLink(payload: WebhookPayloadPullRequestReview) {
+function reviewLink(payload: WebhooksApi.WebhookPayloadPullRequestReview) {
   const review = payload.review;
   const pr = payload.pull_request;
   const repo = payload.repository;
@@ -138,7 +138,7 @@ function handlePullRequests(api: WebhooksApi, reply: IReplyer) {
 
 function handlePush(api: WebhooksApi, reply: IReplyer) {
   api.on('push', ({payload}) => {
-    const commits = payload.commits;
+    const commits = payload.commits as {url: string, id: string, message: string, author: {name: string}}[];
     const ref = payload.ref;
     if (commits.length === 0 || !ref.startsWith('refs/heads/')) {
       return;
@@ -154,7 +154,7 @@ function handlePush(api: WebhooksApi, reply: IReplyer) {
   });
 
   api.on('commit_comment.created', ({payload}) => {
-    const diff = `\`${payload.comment.path}\n${payload.comment.line}\``;
+    const diff = `\`${payload.comment.path ?? ''}\n${payload.comment.line?? '?'}\``;
     return reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.comment.user)}`, diff, escape(payload.comment.body));
   });
 }
@@ -240,7 +240,7 @@ function handleStatus(api: WebhooksApi, reply: IReplyer) {
 
 export const NAME = 'Github';
 
-export function webhookMessage(server: string, chatId: string) {
+export function webhookMessage(server: string, chatId: string): string {
   const url = `${server}/webhooks/github/${encodeURIComponent(chatId)}`;
   const secret = createSecret(chatId);
 
@@ -251,7 +251,7 @@ export function webhookMessage(server: string, chatId: string) {
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse) {
+export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);
@@ -271,9 +271,10 @@ export default async function handle(req: NowRequest, res: NowResponse) {
   handleStatus(api, reply);
   handleProjects(api, reply);
 
-  api.on('*', (event) => {
+  api.on('*', (event: WebhooksApi.WebhookEvent<any>) => {
     if (event.name === 'ping') {
-      const payload = event.payload as WebhookPayloadMeta;
+      const payload = event.payload as WebhooksApi.WebhookPayloadMeta;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return reply(`🚀 Webhook activated for ${repoLink(payload)}`);
     }
     return undefined;

@@ -186,7 +186,7 @@ function handlePipeline(api: GitLabHooks, reply: IReplyer) {
 
 export const NAME = 'Gitlab';
 
-export function webhookMessage(server: string, chatId: string) {
+export function webhookMessage(server: string, chatId: string): string {
   const url = `${server}/webhooks/gitlab/${encodeURIComponent(chatId)}`;
   const secret = createSecret(chatId);
 
@@ -197,7 +197,7 @@ export function webhookMessage(server: string, chatId: string) {
   `;
 }
 
-export default function handle(req: NowRequest, res: NowResponse) {
+export default function handle(req: NowRequest, res: NowResponse): void {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);

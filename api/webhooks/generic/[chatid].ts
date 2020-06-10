@@ -4,7 +4,7 @@ import { replyer } from '../../_internal/telegram';
 
 export const NAME = 'Generic';
 
-export function webhookMessage(server: string, chatId: string) {
+export function webhookMessage(server: string, chatId: string): string {
   const url = `${server}/webhooks/generic/${encodeURIComponent(chatId)}`;
 
   return `Please use this webhook url:
@@ -12,14 +12,14 @@ export function webhookMessage(server: string, chatId: string) {
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse) {
+export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);
 
   const reply = replyer(chatId);
 
-  await reply(`new message received`, `
+  await reply('new message received', `
 \`\`\`
 ${JSON.stringify(req.body, null, 1)}
 \`\`\`

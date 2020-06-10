@@ -31,7 +31,7 @@ interface INetlifyMessage {
 
 export const NAME = 'Netlify';
 
-export function webhookMessage(server: string, chatId: string) {
+export function webhookMessage(server: string, chatId: string): string {
   const url = `${server}/webhooks/netlify/${encodeURIComponent(chatId)}`;
   const secret = createSecret(chatId);
 
@@ -48,7 +48,7 @@ function link(url: string | null, title: string) {
   return `[${escape(title)}](${url})`;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse) {
+export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   //const signature = req.headers["X-Webhook-Signature"];
