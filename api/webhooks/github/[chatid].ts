@@ -1,8 +1,9 @@
-import {NowRequest, NowResponse} from '@now/node';
-import {Webhooks} from '@octokit/webhooks';
-import {ok} from '../../_internal/responses';
-import {createSecret} from '../../_internal/secret';
-import {replyer, escape} from '../../_internal/telegram';
+import { Webhooks } from '@octokit/webhooks';
+import type { CommitCommentEvent, IssueCommentEvent, IssuesEvent, ProjectEvent, PullRequestEvent, PullRequestReviewCommentEvent, PullRequestReviewEvent, ReleaseEvent, Repository, StatusEvent, User } from '@octokit/webhooks-definitions/schema';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { ok } from '../../_internal/responses';
+import { createSecret } from '../../_internal/secret';
+import { escape, replyer } from '../../_internal/telegram';
 
 function link(url: string | null, title: string) {
   if (!url) {
@@ -11,23 +12,23 @@ function link(url: string | null, title: string) {
   return `[${escape(title)}](${url})`;
 }
 
-function user(user: Webhooks.WebhookPayloadIssuesIssueUser) {
+function user(user: User) {
   return link(user.html_url, `@${user.login}`);
 }
 
-function issueLink(payload: Webhooks.WebhookPayloadIssues) {
+function issueLink(payload: IssuesEvent) {
   const issue = payload.issue;
   const repo = payload.repository;
   return link(issue.html_url, `${repo.full_name}#${issue.number} ${issue.title}`);
 }
 
-function releaseLink(payload: Webhooks.WebhookPayloadRelease) {
+function releaseLink(payload: ReleaseEvent) {
   const release = payload.release;
   const repo = payload.repository;
   return link(release.html_url, `${repo.full_name} ${release.name || ''}`);
 }
 
-function repoLink(payload: {repository?: Webhooks.PayloadRepository, organization?: {login: string}}) {
+function repoLink(payload: { repository?: Repository, organization?: { login: string } }) {
   const repo = payload.repository;
   if (repo) {
     return link(repo.html_url, repo.full_name);
@@ -39,36 +40,36 @@ function repoLink(payload: {repository?: Webhooks.PayloadRepository, organizatio
   return '||?';
 }
 
-function projectLink(payload: Webhooks.WebhookPayloadProject) {
+function projectLink(payload: ProjectEvent) {
   const project = payload.project;
   return link(project.html_url, project.name);
 }
 
-function commentLink(payload: Webhooks.WebhookPayloadIssueComment | Webhooks.WebhookPayloadPullRequestReviewComment) {
-  const base = (payload as Webhooks.WebhookPayloadIssueComment).issue || (payload as Webhooks.WebhookPayloadPullRequestReviewComment).pull_request;
+function commentLink(payload: IssueCommentEvent | PullRequestReviewCommentEvent) {
+  const base = (payload as IssueCommentEvent).issue || (payload as PullRequestReviewCommentEvent).pull_request;
   const repo = payload.repository;
   return link(payload.comment.html_url, `${repo.full_name}#${base.number} ${base.title}`);
 }
 
-function commitCommentLink(payload: Webhooks.WebhookPayloadCommitComment) {
+function commitCommentLink(payload: CommitCommentEvent) {
   const base = payload.comment;
   const repo = payload.repository;
   return link(payload.comment.html_url, `${repo.full_name}@${base.commit_id.slice(0, 7)}`);
 }
 
-function commitLink(payload: Webhooks.WebhookPayloadStatus) {
+function commitLink(payload: StatusEvent) {
   const base = payload.commit;
   const repo = payload.repository;
   return link(base.html_url, `${repo.full_name}@${base.sha.slice(0, 7)}`);
 }
 
-function prLink(payload: Webhooks.WebhookPayloadPullRequest) {
+function prLink(payload: PullRequestEvent) {
   const pr = payload.pull_request;
   const repo = payload.repository;
   return link(pr.html_url, `${repo.full_name}#${pr.number} ${pr.title}`);
 }
 
-function reviewLink(payload: Webhooks.WebhookPayloadPullRequestReview) {
+function reviewLink(payload: PullRequestReviewEvent) {
   const review = payload.review;
   const pr = payload.pull_request;
   const repo = payload.repository;
@@ -251,7 +252,7 @@ export function webhookMessage(server: string, chatId: string): string {
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);
@@ -271,19 +272,17 @@ export default async function handle(req: NowRequest, res: NowResponse): Promise
   handleStatus(api, reply);
   handleProjects(api, reply);
 
-  api.on('*', (event: Webhooks.WebhookEvent<any>) => {
-    if (event.name === 'ping') {
-      const payload = event.payload as Webhooks.WebhookPayloadMeta;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return reply(`🚀 Webhook activated for ${repoLink(payload)}`);
-    }
-    return undefined;
+  api.on('ping', ({ payload }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return reply(`🚀 Webhook activated for ${repoLink(payload)}`);
   });
 
   await api.verifyAndReceive({
     id: req.headers['x-request-id'] as string,
-    name: req.headers['x-github-event'] as string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    name: req.headers['x-github-event'] as any,
     signature: req.headers['x-hub-signature'] as string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     payload: req.body
   });
 

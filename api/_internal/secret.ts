@@ -1,5 +1,4 @@
-
-import {createHmac} from 'crypto';
+import { createHmac } from 'crypto';
 
 const baseSecret = process.env.WEBHOOK_SECRET!;
 

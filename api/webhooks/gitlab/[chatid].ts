@@ -1,6 +1,6 @@
-import {NowRequest, NowResponse} from '@now/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import createHandler from 'node-gitlab-webhook';
-import {GitLabHooks, IssueAttributes, MergeRequestAttributes, NoteEvent, PipelineAttributes, Project, User, WikiPageAttributes} from 'node-gitlab-webhook/interfaces';
+import type { GitLabHooks, IssueAttributes, MergeRequestAttributes, NoteEvent, PipelineAttributes, Project, User, WikiPageAttributes } from 'node-gitlab-webhook/interfaces';
 import {createSecret} from '../../_internal/secret';
 import {replyer, escape} from '../../_internal/telegram';
 
@@ -70,16 +70,16 @@ function handleIssues(api: GitLabHooks, reply: IReplyer) {
     const issue = payload.object_attributes;
     switch (issue.action) {
       case 'open':
-        reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.user)}`, escape(issue.description));
+        void reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.user)}`, escape(issue.description));
         break;
       case 'closed':
-        reply(`🐛❌ Closed Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🐛❌ Closed Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
         break;
       case 'reopened':
-        reply(`🐛 Reopened Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🐛 Reopened Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
         break;
       default:
-        reply(`🐛 ${issue.action}? Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🐛 ${issue.action}? Issue ${issueLink(payload)}\nby ${user(payload.user)}`);
         break;
     }
   });
@@ -90,16 +90,16 @@ function handleComments(api: GitLabHooks, reply: IReplyer) {
     const note = payload.object_attributes;
     switch (note.noteable_type.toLowerCase().replace(/_/, '_')) {
       case 'commit':
-        reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.user)}`, note.st_diff.diff, escape(note.note));
+        void reply(`💬 New commit comment on ${commitCommentLink(payload)}\nby ${user(payload.user)}`, note.st_diff.diff, escape(note.note));
         break;
       case 'issue':
-        reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
+        void reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
       case 'merge_request':
-        reply(`💬 New merge request review comment ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
+        void reply(`💬 New merge request review comment ${commentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
       case 'snippet':
-        reply(`💬 New snippet comment ${snippetCommentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
+        void reply(`💬 New snippet comment ${snippetCommentLink(payload)}\nby ${user(payload.user)}`, escape(note.note));
         break;
     }
   });
@@ -110,16 +110,16 @@ function handlePullRequests(api: GitLabHooks, reply: IReplyer) {
     const pr = payload.object_attributes;
     switch (pr.action) {
       case 'open':
-        reply(`🔌 New merge request ${prLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🔌 New merge request ${prLink(payload)}\nby ${user(payload.user)}`);
         break;
       case 'closed':
-        reply(`🔌❌ Closed Merge request ${prLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🔌❌ Closed Merge request ${prLink(payload)}\nby ${user(payload.user)}`);
         break;
       case 'merged':
-        reply(`🥂 Merged & Closed Merge request ${prLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🥂 Merged & Closed Merge request ${prLink(payload)}\nby ${user(payload.user)}`);
         break;
       default:
-        reply(`🔌 ${pr.action}? Issue ${prLink(payload)}\nby ${user(payload.user)}`);
+        void reply(`🔌 ${pr.action}? Issue ${prLink(payload)}\nby ${user(payload.user)}`);
         break;
     }
   });
@@ -139,13 +139,13 @@ function handlePush(api: GitLabHooks, reply: IReplyer) {
     for (const commit of commits) {
       body.push(`${link(commit.url, commit.id.slice(0, 7))}: ${commit.message} by ${commit.author.name}`);
     }
-    reply(header, body.join('\n'));
+    void reply(header, body.join('\n'));
   });
 
   api.on('tag_push', ({payload}) => {
     const ref = payload.ref;
     const tag = ref.substring('refs/tags/'.length);
-    reply(`🔨 tag \`${tag}\` created in ${projectLink(payload)}`);
+    void reply(`🔨 tag \`${tag}\` created in ${projectLink(payload)}`);
   });
 }
 
@@ -154,16 +154,16 @@ function handleWiki(api: GitLabHooks, reply: IReplyer) {
     const wiki = payload.object_attributes;
     switch (wiki.action) {
       case 'open':
-        reply(`📘 Wiki page ${wikiLink(payload)} created in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
+        void reply(`📘 Wiki page ${wikiLink(payload)} created in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       case 'delete':
-        reply(`📘❌ Deleted Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
+        void reply(`📘❌ Deleted Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       case 'update':
-        reply(`📘 Updated Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
+        void reply(`📘 Updated Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
       default:
-        reply(`📘 ${wiki.action}? Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
+        void reply(`📘 ${wiki.action}? Wiki page ${wikiLink(payload)} in ${projectLink(payload)} by ${user(payload.user)}`, escape(wiki.content));
         break;
     }
   });
@@ -175,10 +175,10 @@ function handlePipeline(api: GitLabHooks, reply: IReplyer) {
     const body = payload.builds.map((build) => `${build.stage}: ${build.name} (${build.status})`);
     switch (pipeline.status) {
       case 'success':
-        reply(`☀ Pipeline ${pipelineLink(payload)} state is successful`, body.join('\n'));
+        void reply(`☀ Pipeline ${pipelineLink(payload)} state is successful`, body.join('\n'));
         break;
       default:
-        reply(`🌩 Pipeline ${pipelineLink(payload)} state is ${pipeline.status}`, body.join('\n'));
+        void reply(`🌩 Pipeline ${pipelineLink(payload)} state is ${pipeline.status}`, body.join('\n'));
         break;
     }
   });
@@ -197,7 +197,7 @@ export function webhookMessage(server: string, chatId: string): string {
   `;
 }
 
-export default function handle(req: NowRequest, res: NowResponse): void {
+export default function handle(req: VercelRequest, res: VercelResponse): void {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);

@@ -1,4 +1,4 @@
-import {NowRequest, NowResponse} from '@now/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {ok} from '../../_internal/responses';
 import {replyer, escape} from '../../_internal/telegram';
 
@@ -23,12 +23,12 @@ export function webhookMessage(server: string, chatId: string): string {
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);
 
-  const body: ICircleCIMessage = req.body;
+  const body = req.body as unknown as ICircleCIMessage;
 
   const reply = replyer(chatId);
 

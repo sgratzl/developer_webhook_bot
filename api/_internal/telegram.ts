@@ -1,4 +1,4 @@
-import {Telegram, Context} from 'telegraf';
+import { Telegram } from 'telegraf';
 
 const DEFAULT_TRUNCATION_LIMIT = 4096;
 const TRUNCATED_MESSAGE = '**Truncated message, open on GitHub to read more**';
@@ -19,16 +19,6 @@ export function truncateMessage(header: string, body: string, footer = ''): stri
   return `${header}\n\n${body.slice(0, remaining)}\n${TRUNCATED_MESSAGE}\n${footer}`;
 
 }
-
-export function toArgs(ctx: Context): string[] {
-  const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
-  const parts = regex.exec(ctx.message!.text!.trim());
-  if (!parts) {
-    return [];
-  }
-  return !parts[3] ? [] : parts[3].split(/\s+/).filter((arg) => arg.length);
-}
-
 
 export function replyer(chatId: string) {
   const telegram = new Telegram(process.env.BOT_TOKEN!);

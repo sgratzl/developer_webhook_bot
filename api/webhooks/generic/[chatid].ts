@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from '@now/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
 import { replyer } from '../../_internal/telegram';
 
@@ -12,7 +12,7 @@ export function webhookMessage(server: string, chatId: string): string {
   `;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   const chatId = decodeURIComponent(chatid);

@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from '@now/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
 import { replyer, escape } from '../../_internal/telegram';
 import { createSecret } from '../../_internal/secret';
@@ -48,7 +48,7 @@ function link(url: string | null, title: string) {
   return `[${escape(title)}](${url})`;
 }
 
-export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
 
   //const signature = req.headers["X-Webhook-Signature"];
@@ -57,7 +57,7 @@ export default async function handle(req: NowRequest, res: NowResponse): Promise
 
   //const decoded = JWT.decode(signature, secret, true, { iss: "netlify", verify_iss: true, algorithm: "HS256" })
 
-  const body: INetlifyMessage = req.body;
+  const body = req.body as unknown as INetlifyMessage;
 
   const reply = replyer(chatId);
 

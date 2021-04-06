@@ -1,12 +1,11 @@
-import {NowRequest, NowResponse} from '@now/node';
-import Telegraf, {Markup} from 'telegraf';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Markup, Telegraf, } from 'telegraf';
 import * as circleci from './webhooks/circleci/[chatid]';
 import * as github from './webhooks/github/[chatid]';
 import * as gitlab from './webhooks/gitlab/[chatid]';
 import * as netlify from './webhooks/netlify/[chatid]';
 import * as generic from './webhooks/generic/[chatid]';
-import {ok} from './_internal/responses';
-import {toArgs} from './_internal/telegram';
+import { ok } from './_internal/responses';
 
 const webhooks = [
   github,
@@ -18,30 +17,29 @@ const webhooks = [
 
 let serverUrl = '';
 
-const bot = new Telegraf(process.env.BOT_TOKEN!, {
-  username: 'developer_webhook_bot'
-});
+const bot = new Telegraf(process.env.BOT_TOKEN!);
 
 bot.start((ctx) => {
-  ctx.reply('This bot forwards webhooks as chat messages');
+  void ctx.reply('This bot forwards webhooks as chat messages');
 });
 bot.command('webhook', (ctx) => {
-  const args = toArgs(ctx);
+  const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
+  const parts = regex.exec(ctx.message.text.trim());
+  const args = !parts || !parts[3] ? [] : parts[3].split(/\s+/).filter((arg) => arg.length);
+
   // console.log(args);
   if (args.length > 0) {
     const webhook = webhooks.find((d) => d.NAME.toLowerCase() === args[0].toLowerCase());
     if (webhook) {
-      const msg = webhook.webhookMessage(serverUrl, String(ctx.chat!.id));
+      const msg = webhook.webhookMessage(serverUrl, String(ctx.chat.id));
       return ctx.replyWithMarkdown(msg);
     }
   }
 
   const buttons = webhooks.map((webhook) => {
-    return Markup.callbackButton(webhook.NAME, webhook.NAME);
+    return Markup.button.callback(webhook.NAME, webhook.NAME);
   });
-  return ctx.reply('Available Webhook Providers', {
-    reply_markup: Markup.inlineKeyboard(buttons)
-  });
+  return ctx.reply('Available Webhook Providers', Markup.inlineKeyboard(buttons));
 });
 
 for (const webhook of webhooks) {
@@ -52,7 +50,7 @@ for (const webhook of webhooks) {
 }
 
 
-export default async function handle(req: NowRequest, res: NowResponse): Promise<void> {
+export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   serverUrl = `https://${req.headers.host!}/api`;
 
   await bot.handleUpdate(req.body);
