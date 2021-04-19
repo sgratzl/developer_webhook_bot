@@ -6,3 +6,5 @@ node_modules
 /.yarnrc.yml
 /.pnp.js
 /.vscode
+
+.vercel

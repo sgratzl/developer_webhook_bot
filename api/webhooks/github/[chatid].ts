@@ -254,6 +254,7 @@ export function webhookMessage(server: string, chatId: string): string {
 
 export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   const chatid = req.query.chatid! as string;
+  console.error(chatid);
 
   const chatId = decodeURIComponent(chatid);
 
@@ -276,7 +277,10 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return reply(`🚀 Webhook activated for ${repoLink(payload)}`);
   });
-
+  api.onError((error) => {
+    console.error(error);
+  });
+  console.error('verifyAndReceiver');
   await api.verifyAndReceive({
     id: req.headers['x-request-id'] as string,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -285,6 +289,6 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     payload: req.body
   });
-
+  console.error('done');
   return ok(res);
 }
