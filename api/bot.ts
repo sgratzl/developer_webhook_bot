@@ -57,3 +57,24 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
 
   return ok(res);
 }
+
+
+async function _main() {
+  // Enable graceful stop
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+  const lastArg = process.argv[process.argv.length - 1];
+  if (lastArg.startsWith('https')) {
+    await bot.telegram.setWebhook(lastArg);
+    console.log('set webhook', lastArg);
+    return;
+  }
+
+  console.log('start bot');
+  await bot.telegram.deleteWebhook();
+  await bot.launch();
+}
+
+if (require.main === module) {
+  void _main();
+}
