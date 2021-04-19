@@ -1,13 +1,14 @@
 # Developer Webhook Telegram Bot
 [![Github Actions][github-actions-image]][github-actions-url]
 
+
 [Developer Webhook Bot](https://t.me/developer_webhook_bot) is a simple Telegram bot that will forward you Webhooks in your chats.
 
 So far, the bot is mainly used to handle Github Webhook events.
 
 ## Privacy
 
-Up to know the Bot is stateless. The link between a webhook and a chat is encoded in the webhook link itself. 
+Up to know the Bot is stateless. The link between a webhook and a chat is encoded in the webhook link itself.
 
 ## Commands
  * `/webhook` generates a webhook url for the chosen provider that will forward messages to the current chat
