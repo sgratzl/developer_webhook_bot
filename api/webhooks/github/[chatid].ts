@@ -3,7 +3,7 @@ import type { CommitCommentEvent, DiscussionAnsweredEvent, DiscussionCommentEven
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
 import { createSecret } from '../../_internal/secret';
-import { escape, replyer } from '../../_internal/telegram';
+import { escape, replier } from '../../_internal/telegram';
 
 function link(url: string | null, title: string) {
   if (!url) {
@@ -92,9 +92,9 @@ function reviewLink(payload: PullRequestReviewEvent) {
   return link(review.html_url, `${repo.full_name}#${pr.number} ${pr.title}`);
 }
 
-declare type IReplyer = (header: string, body?: string | null | undefined, footer?: string | undefined) => Promise<undefined>;
+declare type IReplier = (header: string, body?: string | null | undefined, footer?: string | undefined) => Promise<undefined>;
 
-function handleIssues(api: Webhooks, reply: IReplyer) {
+function handleIssues(api: Webhooks, reply: IReplier) {
   api.on('issues.opened', async ({payload}) => {
     return reply(`🐛 New issue ${issueLink(payload)}\nby ${user(payload.issue.user)}`, escape(payload.issue.body));
   });
@@ -106,7 +106,7 @@ function handleIssues(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleComments(api: Webhooks, reply: IReplyer) {
+function handleComments(api: Webhooks, reply: IReplier) {
   api.on('issue_comment.created', ({payload}) => {
     return reply(`💬 New comment on ${commentLink(payload)}\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
   });
@@ -118,7 +118,7 @@ function handleComments(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleDiscussions(api: Webhooks, reply: IReplyer) {
+function handleDiscussions(api: Webhooks, reply: IReplier) {
   api.on('discussion.created', ({ payload }) => {
     return reply(`🧑‍🤝‍🧑 New discussion on ${discussionLink(payload)}\nby ${user(payload.discussion.user)}`, escape(payload.discussion.body));
   });
@@ -142,7 +142,7 @@ function handleDiscussions(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handlePullRequests(api: Webhooks, reply: IReplyer) {
+function handlePullRequests(api: Webhooks, reply: IReplier) {
   api.on('pull_request.opened', ({payload}) => {
     return reply(`🔌 New pull request ${prLink(payload)}\nby ${user(payload.pull_request.user)}`);
   });
@@ -177,7 +177,7 @@ function handlePullRequests(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handlePush(api: Webhooks, reply: IReplyer) {
+function handlePush(api: Webhooks, reply: IReplier) {
   api.on('push', ({payload}) => {
     const commits = payload.commits as {url: string, id: string, message: string, author: {name: string}}[];
     const ref = payload.ref;
@@ -200,7 +200,7 @@ function handlePush(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleRelease(api: Webhooks, reply: IReplyer) {
+function handleRelease(api: Webhooks, reply: IReplier) {
   api.on('release.created', ({payload}) => {
     let sub = '';
     if (payload.release.draft) {
@@ -212,7 +212,7 @@ function handleRelease(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleExtras(api: Webhooks, reply: IReplyer) {
+function handleExtras(api: Webhooks, reply: IReplier) {
   api.on('public', ({payload}) => {
     return reply(`🥂 ${repoLink(payload)} was made public`);
   });
@@ -231,7 +231,7 @@ function handleExtras(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleProjects(api: Webhooks, reply: IReplyer) {
+function handleProjects(api: Webhooks, reply: IReplier) {
   api.on('project.created', ({payload}) => {
     return reply(`📘 Project ${projectLink(payload)} created in ${repoLink(payload)} by ${user(payload.project.creator)}`, escape(payload.project.body));
   });
@@ -240,7 +240,7 @@ function handleProjects(api: Webhooks, reply: IReplyer) {
   });
 }
 
-function handleStatus(api: Webhooks, reply: IReplyer) {
+function handleStatus(api: Webhooks, reply: IReplier) {
   api.on('deployment_status', ({payload}) => {
     const status = payload.deployment_status;
     switch (status.state) {
@@ -302,7 +302,7 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
       secret: createSecret(chatId),
   });
 
-  const reply = replyer(chatId);
+  const reply = replier(chatId);
 
   handleIssues(api, reply);
   handleComments(api, reply);

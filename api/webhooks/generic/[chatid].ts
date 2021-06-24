@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
-import { replyer } from '../../_internal/telegram';
+import { replier } from '../../_internal/telegram';
 
 export const NAME = 'Generic';
 
@@ -17,7 +17,7 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
 
   const chatId = decodeURIComponent(chatid);
 
-  const reply = replyer(chatId);
+  const reply = replier(chatId);
 
   await reply('new message received', `
 \`\`\`

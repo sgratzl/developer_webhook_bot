@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import createHandler from 'node-gitlab-webhook';
 import type { GitLabHooks, IssueAttributes, MergeRequestAttributes, NoteEvent, PipelineAttributes, Project, User, WikiPageAttributes } from 'node-gitlab-webhook/interfaces';
 import {createSecret} from '../../_internal/secret';
-import {replyer, escape} from '../../_internal/telegram';
+import { replier, escape } from '../../_internal/telegram';
 
 function link(url: string | null, title: string) {
   if (!url) {
@@ -63,9 +63,9 @@ function prLink(payload: {object_attributes: MergeRequestAttributes; project: Pr
 }
 
 
-declare type IReplyer = (header: string, body?: string | null | undefined, footer?: string | undefined) => Promise<undefined>;
+declare type IReplier = (header: string, body?: string | null | undefined, footer?: string | undefined) => Promise<undefined>;
 
-function handleIssues(api: GitLabHooks, reply: IReplyer) {
+function handleIssues(api: GitLabHooks, reply: IReplier) {
   api.on('issue', ({payload}) => {
     const issue = payload.object_attributes;
     switch (issue.action) {
@@ -85,7 +85,7 @@ function handleIssues(api: GitLabHooks, reply: IReplyer) {
   });
 }
 
-function handleComments(api: GitLabHooks, reply: IReplyer) {
+function handleComments(api: GitLabHooks, reply: IReplier) {
   api.on('note', ({payload}) => {
     const note = payload.object_attributes;
     switch (note.noteable_type.toLowerCase().replace(/_/, '_')) {
@@ -105,7 +105,7 @@ function handleComments(api: GitLabHooks, reply: IReplyer) {
   });
 }
 
-function handlePullRequests(api: GitLabHooks, reply: IReplyer) {
+function handlePullRequests(api: GitLabHooks, reply: IReplier) {
   api.on('merge_request', ({payload}) => {
     const pr = payload.object_attributes;
     switch (pr.action) {
@@ -125,7 +125,7 @@ function handlePullRequests(api: GitLabHooks, reply: IReplyer) {
   });
 }
 
-function handlePush(api: GitLabHooks, reply: IReplyer) {
+function handlePush(api: GitLabHooks, reply: IReplier) {
   api.on('push', ({payload}) => {
     const commits = payload.commits;
     const ref = payload.ref;
@@ -149,7 +149,7 @@ function handlePush(api: GitLabHooks, reply: IReplyer) {
   });
 }
 
-function handleWiki(api: GitLabHooks, reply: IReplyer) {
+function handleWiki(api: GitLabHooks, reply: IReplier) {
   api.on('wiki_page', ({payload}) => {
     const wiki = payload.object_attributes;
     switch (wiki.action) {
@@ -169,7 +169,7 @@ function handleWiki(api: GitLabHooks, reply: IReplyer) {
   });
 }
 
-function handlePipeline(api: GitLabHooks, reply: IReplyer) {
+function handlePipeline(api: GitLabHooks, reply: IReplier) {
   api.on('pipeline', ({payload}) => {
     const pipeline = payload.object_attributes;
     const body = payload.builds.map((build) => `${build.stage}: ${build.name} (${build.status})`);
@@ -207,7 +207,7 @@ export default function handle(req: VercelRequest, res: VercelResponse): void {
     secret: createSecret(chatId)
   });
 
-  const reply = replyer(chatId);
+  const reply = replier(chatId);
 
   handleIssues(api, reply);
   handleComments(api, reply);

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {ok} from '../../_internal/responses';
-import {replyer, escape} from '../../_internal/telegram';
+import { replier, escape } from '../../_internal/telegram';
 
 interface IMessage {
   fallback: string;
@@ -30,7 +30,7 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
 
   const body = req.body as unknown as ICircleCIMessage;
 
-  const reply = replyer(chatId);
+  const reply = replier(chatId);
 
   await reply(escape(body.text));
 

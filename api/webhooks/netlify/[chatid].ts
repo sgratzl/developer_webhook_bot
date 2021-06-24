@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
-import { replyer, escape } from '../../_internal/telegram';
+import { replier, escape } from '../../_internal/telegram';
 import { createSecret } from '../../_internal/secret';
 
 interface INetlifyMessage {
@@ -59,7 +59,7 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
 
   const body = req.body as unknown as INetlifyMessage;
 
-  const reply = replyer(chatId);
+  const reply = replier(chatId);
 
   const deploymentUrl = `${body.adminurl}/deploys/${body.buildid}`;
   const url = link(body.sslurl, `Netlify App ${body.name}`);

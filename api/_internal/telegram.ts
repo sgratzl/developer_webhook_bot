@@ -20,7 +20,7 @@ export function truncateMessage(header: string, body: string, footer = ''): stri
 
 }
 
-export function replyer(chatId: string) {
+export function replier(chatId: string) {
   const telegram = new Telegram(process.env.BOT_TOKEN!);
 
   return (header: string, body?: string | null, footer?: string) => {
