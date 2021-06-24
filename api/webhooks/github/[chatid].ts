@@ -1,5 +1,5 @@
 import { Webhooks } from '@octokit/webhooks';
-import type { CommitCommentEvent, DiscussionAnsweredEvent, DiscussionCommentEvent, DiscussionEvent, IssueCommentEvent, IssuesEvent, ProjectEvent, PullRequestEvent, PullRequestReviewCommentEvent, PullRequestReviewEvent, ReleaseEvent, Repository, StatusEvent, User } from '@octokit/webhooks-definitions/schema';
+import type { CommitCommentEvent, DiscussionAnsweredEvent, DiscussionCommentEvent, DiscussionEvent, IssueCommentEvent, IssuesEvent, ProjectEvent, PullRequestEvent, PullRequestReviewCommentEvent, PullRequestReviewEvent, ReleaseEvent, Repository, StatusEvent, User } from '@octokit/webhooks-types';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
 import { createSecret } from '../../_internal/secret';
