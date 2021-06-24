@@ -1,5 +1,5 @@
 import { Webhooks } from '@octokit/webhooks';
-import type { CommitCommentEvent, IssueCommentEvent, IssuesEvent, ProjectEvent, PullRequestEvent, PullRequestReviewCommentEvent, PullRequestReviewEvent, ReleaseEvent, Repository, StatusEvent, User } from '@octokit/webhooks-definitions/schema';
+import type { CommitCommentEvent, DiscussionAnsweredEvent, DiscussionCommentEvent, DiscussionEvent, IssueCommentEvent, IssuesEvent, ProjectEvent, PullRequestEvent, PullRequestReviewCommentEvent, PullRequestReviewEvent, ReleaseEvent, Repository, StatusEvent, User } from '@octokit/webhooks-definitions/schema';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ok } from '../../_internal/responses';
 import { createSecret } from '../../_internal/secret';
@@ -51,6 +51,22 @@ function commentLink(payload: IssueCommentEvent | PullRequestReviewCommentEvent)
   return link(payload.comment.html_url, `${repo.full_name}#${base.number} ${base.title}`);
 }
 
+function discussionLink(payload: DiscussionEvent) {
+  const discussion = payload.discussion;
+  const repo = payload.repository;
+  return link(payload.discussion.html_url, `${repo.full_name}#${discussion.id} ${discussion.title}`);
+}
+function discussionCommentLink(payload: DiscussionCommentEvent) {
+  const discussion = payload.discussion;
+  const repo = payload.repository;
+  return link(payload.comment.html_url, `${repo.full_name}#${discussion.id} ${discussion.title}`);
+}
+function discussionAnswerLink(payload: DiscussionAnsweredEvent) {
+  const discussion = payload.discussion;
+  const repo = payload.repository;
+  return link(payload.answer.html_url, `${repo.full_name}#${discussion.id} ${discussion.title}`);
+}
+
 function commitCommentLink(payload: CommitCommentEvent) {
   const base = payload.comment;
   const repo = payload.repository;
@@ -99,6 +115,30 @@ function handleComments(api: Webhooks, reply: IReplyer) {
   });
   api.on('issue_comment.deleted', ({payload}) => {
     return reply(`💬❌ Comment on ${commentLink(payload)} Deleted\nby ${user(payload.comment.user)}`);
+  });
+}
+
+function handleDiscussions(api: Webhooks, reply: IReplyer) {
+  api.on('discussion.created', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑 New discussion on ${discussionLink(payload)}\nby ${user(payload.discussion.user)}`, escape(payload.discussion.body));
+  });
+  api.on('discussion.edited', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑📝 Discussion on ${discussionLink(payload)}\nby ${user(payload.discussion.user)}`, escape(payload.discussion.body));
+  });
+  api.on('discussion.deleted', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑❌ Discussion on ${discussionLink(payload)}\nby ${user(payload.discussion.user)}`, escape(payload.discussion.body));
+  });
+  api.on('discussion.answered', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑✔️ Discussion Answered ${discussionAnswerLink(payload)}\nby ${user(payload.discussion.user)}`, escape(payload.answer.body));
+  });
+  api.on('discussion_comment.created', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑💬 New Comment on ${discussionCommentLink(payload)}\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
+  });
+  api.on('discussion_comment', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑💬📝 Comment on ${discussionCommentLink(payload)} Edited\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
+  });
+  api.on('discussion_comment.deleted', ({ payload }) => {
+    return reply(`🧑‍🤝‍🧑💬❌ Comment on ${discussionCommentLink(payload)} Deleted\nby ${user(payload.comment.user)}`);
   });
 }
 
@@ -272,6 +312,7 @@ export default async function handle(req: VercelRequest, res: VercelResponse): P
   handleRelease(api, reply);
   handleStatus(api, reply);
   handleProjects(api, reply);
+  handleDiscussions(api, reply);
 
   api.on('ping', ({ payload }) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
