@@ -134,7 +134,7 @@ function handleDiscussions(api: Webhooks, reply: IReplier) {
   api.on('discussion_comment.created', ({ payload }) => {
     return reply(`🧑‍🤝‍🧑💬 New Comment on ${discussionCommentLink(payload)}\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
   });
-  api.on('discussion_comment', ({ payload }) => {
+  api.on('discussion_comment.edited', ({ payload }) => {
     return reply(`🧑‍🤝‍🧑💬📝 Comment on ${discussionCommentLink(payload)} Edited\nby ${user(payload.comment.user)}`, escape(payload.comment.body));
   });
   api.on('discussion_comment.deleted', ({ payload }) => {
