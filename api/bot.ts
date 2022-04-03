@@ -6,6 +6,7 @@ import * as gitlab from './webhooks/gitlab/[chatid]';
 import * as netlify from './webhooks/netlify/[chatid]';
 import * as generic from './webhooks/generic/[chatid]';
 import { ok } from './_internal/responses';
+import type { Update } from 'telegraf/typings/core/types/typegram';
 
 const webhooks = [
   github,
@@ -53,7 +54,7 @@ for (const webhook of webhooks) {
 export default async function handle(req: VercelRequest, res: VercelResponse): Promise<void> {
   serverUrl = `https://${req.headers.host!}/api`;
 
-  await bot.handleUpdate(req.body);
+  await bot.handleUpdate(req.body as Update);
 
   return ok(res);
 }
