@@ -1,10 +1,27 @@
-node_modules
-*.tsbuildinfo
+# Logs
+logs
+*.log
+npm-debug.log*
+
+/coverage
+/node_modules
+.npm
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/versions
+.pnp.*
+
+# Build files
+/.tmp
 /build
-/.env
-/.yarn
-/.yarnrc.yml
-/.pnp.js
+
+*.tgz
+/.vscode/extensions.json
+/docs
+*.tsbuildinfo
 /.vscode
 
 .vercel
+.env
