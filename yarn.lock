@@ -147,22 +147,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/webhooks-types@npm:5.5.1, @octokit/webhooks-types@npm:^5.5.1":
+"@octokit/webhooks-types@npm:5.8.0":
+  version: 5.8.0
+  resolution: "@octokit/webhooks-types@npm:5.8.0"
+  checksum: a5103ef5224e0fab201845fa23333f21415aebae7650f1b6ffe64c11377847139411a1a37fff5931aead13658b94b79ab0abbad24b9c30bfc4d2c9528ceb72d1
+  languageName: node
+  linkType: hard
+
+"@octokit/webhooks-types@npm:^5.5.1":
   version: 5.5.1
   resolution: "@octokit/webhooks-types@npm:5.5.1"
   checksum: c9b1eacc02f68c0bcdccaa662c4c1adc19e6d5799370d5f4f9429a382ecb2d63b4be52711da7058aafa36afb6d98bf0ddb4bcf1d8dda8251068c720cf9fa2b40
   languageName: node
   linkType: hard
 
-"@octokit/webhooks@npm:^9.23.0":
-  version: 9.23.0
-  resolution: "@octokit/webhooks@npm:9.23.0"
+"@octokit/webhooks@npm:^9.26.3":
+  version: 9.26.3
+  resolution: "@octokit/webhooks@npm:9.26.3"
   dependencies:
     "@octokit/request-error": ^2.0.2
     "@octokit/webhooks-methods": ^2.0.0
-    "@octokit/webhooks-types": 5.5.1
+    "@octokit/webhooks-types": 5.8.0
     aggregate-error: ^3.1.0
-  checksum: f1803d14790957f619aadc68ec5f460fa8acb295b24c29074a8771ceb4f418e9de170b4b96b4436e731606d26318fedb89aaa68005dbb47dbd6e764c140dc43a
+  checksum: f12611db4327e0056af146d32ae6fc3030ed2410cc7aee44aeeb7b3e6cb8abc714a0fd0a98307d902938dbf76768314143be1425c904a2441e8fef4ea4c729b6
   languageName: node
   linkType: hard
 
@@ -1193,7 +1200,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "developer_webhook_bot@workspace:."
   dependencies:
-    "@octokit/webhooks": ^9.23.0
+    "@octokit/webhooks": ^9.26.3
     "@octokit/webhooks-types": ^5.5.1
     "@types/glob": ^7.2.0
     "@types/node": ^17.0.23
